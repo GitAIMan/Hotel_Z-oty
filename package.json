@@ -1,0 +1,11 @@
+{
+    "name": "zloty-gron-root",
+    "private": true,
+    "scripts": {
+        "start": "cd server && npm install && npm start",
+        "build": "echo 'No build needed for root'"
+    },
+    "engines": {
+        "node": "18.x"
+    }
+}
