@@ -169,7 +169,7 @@ function SettlementList({ entity }) {
                     </span>
                 </div>
 
-                <div className="overflow-x-auto">
+                <div className="overflow-x-auto hidden md:block">
                     <table className="w-full">
                         <thead>
                             <tr className="bg-amber-100/50 text-left border-b border-amber-100">
@@ -232,6 +232,55 @@ function SettlementList({ entity }) {
                             )}
                         </tbody>
                     </table>
+                </div>
+
+                {/* Mobile Card View */}
+                <div className="md:hidden divide-y divide-amber-100">
+                    {settlements.map((s) => (
+                        <div key={s.id} className="p-4 flex flex-col gap-3">
+                            <div className="flex justify-between items-start gap-3">
+                                <div className="flex items-center gap-3 min-w-0">
+                                    <div className="p-2 bg-white border border-amber-100 rounded-lg text-amber-600 shadow-sm shrink-0">
+                                        <FileSpreadsheet size={18} />
+                                    </div>
+                                    <div className="min-w-0">
+                                        <p className="font-bold text-gray-900 text-sm truncate">{s.fileName}</p>
+                                        <p className="text-xs text-gray-500">{new Date(s.createdAt).toLocaleDateString('pl-PL')}</p>
+                                    </div>
+                                </div>
+                                <span className={`shrink-0 inline-flex items-center gap-1 px-2 py-1 rounded-full text-[10px] font-bold uppercase tracking-wide border ${s.status === 'processed' ? 'bg-green-50 text-green-700 border-green-200' : 'bg-yellow-50 text-yellow-700 border-yellow-200'}`}>
+                                    {s.status === 'processed' ? 'OK' : '...'}
+                                </span>
+                            </div>
+
+                            <div className="flex items-center justify-between pt-2">
+                                <div className="text-xs text-gray-500">
+                                    {s.totalProcessed > 0 ? `${s.totalProcessed} sparowanych` : 'Brak par'}
+                                </div>
+                                <div className="flex items-center gap-2">
+                                    <button
+                                        onClick={() => setSelectedSettlement(s)}
+                                        className="p-2 text-gray-500 hover:text-blue-600 bg-gray-50 rounded-full border border-gray-100"
+                                        title="Pokaż szczegóły"
+                                    >
+                                        <Eye size={16} />
+                                    </button>
+                                    <button
+                                        onClick={() => handleDelete(s.id)}
+                                        className="p-2 text-gray-500 hover:text-red-600 bg-gray-50 rounded-full border border-gray-100"
+                                        title="Usuń rozliczenie"
+                                    >
+                                        <Trash2 size={16} />
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    ))}
+                    {settlements.length === 0 && (
+                        <div className="p-8 text-center text-gray-400 bg-amber-50/10">
+                            <p className="text-sm">Brak wgranych rozliczeń.</p>
+                        </div>
+                    )}
                 </div>
             </div>
         </div>
