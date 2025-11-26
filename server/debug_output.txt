@@ -1,0 +1,194 @@
+=== INVOICES IN DATABASE ===
+ID: 1 | No: FV/257/2025/10 | Contractor: HIGA SŁAWOMIR MIKA | Gross: 387.45 | Status: unpaid
+
+=== SETTLEMENTS IN DATABASE ===
+ID: 1 | File: Rozliczenie_HIGA_1.png | Processed: 0 | Status: processed
+  Payments Data Sample: [
+  {
+    "date": "2025-10-22",
+    "amount": 1880.66,
+    "type": "outgoing",
+    "contractor": "FARUTEX SP. Z O.O.",
+    "description": "PRZELEW ELIXIR - ONLINE, Na rachunku: 88 1600 1260 0004 0902 7034 0001 FARUTEX SP. Z O.O., Tytuł: FV/NT/25/10-02308 z 17,10"
+  },
+  {
+    "date": "2025-10-22",
+    "amount": 2700,
+    "type": "outgoing",
+    "contractor": "BUDMAX Marek Sikora",
+    "description": "PRZELEW ELIXIR - ONLINE, Na rachunku: 96 1050 1096 1000 0090 7354 7201 BUDMAX Marek Sikora, Tytuł: FV 14/10/2025 z 17.10"
+  },
+  {
+    "date": "2025-10-22",
+    "amount": 4577,
+    "type": "outgoing",
+    "contractor": "PayPro S.A.",
+    "description": "PRZELEW NA RACHUNEK W SAN PL - ONLINE, Na rachunku: 80 1090 2851 0000 0001 4349 7658 PayPro S.A., Tytuł: /OPT/X////P24-K8Y-G-9W-A1J"
+  },
+  {
+    "date": "2025-10-22",
+    "amount": 362.36,
+    "type": "outgoing",
+    "contractor": "Yati Buss Agnieszka",
+    "description": "PRZELEW ELIXIR - ONLINE, Na rachunku: 81 1020 2498 0000 8302 0134 3821 Yati Buss Agnieszka, Tytuł: FV 85/10/2025 z 15.10"
+  },
+  {
+    "date": "2025-10-22",
+    "amount": 1377.23,
+    "type": "outgoing",
+    "contractor": "HIGA SAWOMIR MIKA",
+    "description": "PRZELEW ELIXIR - ONLINE, Na rachunku: 52 1050 1070 1000 0090 9247 9543 HIGA SAWOMIR MIKA, Tytuł: FV/411/2025/10 z 20,10"
+  }
+]
+ID: 2 | File: Rozliczenie_HIGA_2.png | Processed: 0 | Status: processed
+  Payments Data Sample: [
+  {
+    "date": "2025-10-22",
+    "amount": 46.78,
+    "type": "outgoing",
+    "contractor": "PHU GOLIK S.I.",
+    "description": "PRZELEW ELIXIR - ONLINE, Na rachunek: 08 8129 1014 2002 0021 8740 0001 PHU GOLIK S.I., ISTEBNA 1347, Tytuł: FV 1559/2025 z 13,10"
+  },
+  {
+    "date": "2025-10-22",
+    "amount": 1235.92,
+    "type": "outgoing",
+    "contractor": "HIGA SAWOMIR MIKA",
+    "description": "PRZELEW ELIXIR - ONLINE, Na rachunek: 52 1050 1070 1000 0090 9247 9543 HIGA SAWOMIR MIKA, Tytuł: FV/382/2025/10 z 17,10"
+  },
+  {
+    "date": "2025-10-22",
+    "amount": 4365.27,
+    "type": "outgoing",
+    "contractor": "IT BIZNES PARTNER SP. Z O.O.",
+    "description": "PRZELEW NA RACHUNEK W SAN PL - ONLINE, Na rachunek: 20 1090 2011 0000 0001 4278 4227 IT BIZNES PARTNER SP. Z O.O., Bielsko-Biała, Tytuł: FV 814/25/K z 02,10"
+  },
+  {
+    "date": "2025-10-22",
+    "amount": 315,
+    "type": "outgoing",
+    "contractor": "JANECZKA JANINA BIAŁAS",
+    "description": "PRZELEW ELIXIR - ONLINE, Na rachunek: 33 1050 1070 1000 0090 8024 4693 JANECZKA JANINA BIAŁAS, Tytuł: FV 242/2025 z z 17,10"
+  },
+  {
+    "date": "2025-10-22",
+    "amount": 400,
+    "type": "outgoing",
+    "contractor": "JANECZKA JANINA BIAŁAS",
+    "description": "PRZELEW ELIXIR - ONLINE, Na rachunek: 33 1050 1070 1000 0090 8024 4693 JANECZKA JANINA BIAŁAS, Tytuł: FV 240/2025 z z 17,10"
+  }
+]
+ID: 3 | File: Rozliczenie_HIGA_3.png | Processed: 0 | Status: processed
+  Payments Data Sample: [
+  {
+    "date": "2025-10-22",
+    "amount": 356.87,
+    "type": "outgoing",
+    "contractor": "HIGA SAWOMIR MIKA",
+    "description": "PRZELEW ELIXIR - ONLINE, FV/410/2025/10 z 20,10"
+  },
+  {
+    "date": "2025-10-22",
+    "amount": 1576,
+    "type": "outgoing",
+    "contractor": "NOVA GROUP A CHMIELEWSKI SP. K",
+    "description": "PRZELEW ELIXIR - ONLINE, Faktura nr F/006125/25/SK z 21,10"
+  },
+  {
+    "date": "2025-10-22",
+    "amount": 1600.65,
+    "type": "outgoing",
+    "contractor": "HIGA SAWOMIR MIKA",
+    "description": "PRZELEW ELIXIR - ONLINE, FV/339/2025/10 z 15,10"
+  },
+  {
+    "date": "2025-10-22",
+    "amount": 499.38,
+    "type": "outgoing",
+    "contractor": "HIGA SAWOMIR MIKA",
+    "description": "PRZELEW ELIXIR - ONLINE, FV/414/2025/10 z 20,10"
+  },
+  {
+    "date": "2025-10-22",
+    "amount": 3885.39,
+    "type": "outgoing",
+    "contractor": "MARKET BUDOWLANY BAZA S.C.",
+    "description": "PRZELEW ELIXIR - ONLINE, Fv 517/10/2025 z 27,10"
+  }
+]
+ID: 4 | File: Rozliczenie_HIGA_4.png | Processed: 0 | Status: processed
+  Payments Data Sample: [
+  {
+    "date": "2025-10-22",
+    "amount": 3146.34,
+    "type": "outgoing",
+    "contractor": "IT BIZNES PARTNER SP. Z O.O.",
+    "description": "PRZELEW NA RACHUNEK W SAN PL - ONLINE, IT BIZNES PARTNER SP. Z O.O., Bielsko-Biała, Tytuł: FV 855/25/K z 21,10"
+  },
+  {
+    "date": "2025-10-22",
+    "amount": 6273,
+    "type": "outgoing",
+    "contractor": "VENTRA MICHAŁ NOGALA",
+    "description": "PRZELEW ELIXIR - ONLINE, VENTRA MICHAŁ NOGALA, Tytuł: Faktura nr A5/10/2025 z 20,10"
+  },
+  {
+    "date": "2025-10-22",
+    "amount": 217.81,
+    "type": "outgoing",
+    "contractor": "HIGA SAWOMIR MIKA",
+    "description": "PRZELEW ELIXIR - ONLINE, HIGA SAWOMIR MIKA, Tytuł: FV/381/2025/10 z 17,10"
+  },
+  {
+    "date": "2025-10-22",
+    "amount": 3.94,
+    "type": "outgoing",
+    "contractor": "Alsendo Sp. z o.o.",
+    "description": "PRZELEW ELIXIR - ONLINE, Alsendo Sp. z o.o., Tytuł: 41189G105/AP/2025 z 16,10"
+  },
+  {
+    "date": "2025-10-22",
+    "amount": 1667.31,
+    "type": "outgoing",
+    "contractor": "MARKET BUDOWLANY BAZA S.C.",
+    "description": "PRZELEW ELIXIR - ONLINE, MARKET BUDOWLANY BAZA S.C., Tytuł: Fv 518/10/2025 z 27,10"
+  }
+]
+ID: 5 | File: Rozliczenie_HIGA_5.png | Processed: 0 | Status: processed
+  Payments Data Sample: [
+  {
+    "date": "2025-10-22",
+    "amount": 1425.03,
+    "type": "outgoing",
+    "contractor": "NOVA GROUP A.CHMIELEVSKI SP. K",
+    "description": "PRZELEW ELIXIR - ONLINE, Z rachunku: 50 1090 1782 0000 0001 4836 9080 GOLDENPEAK III SPÓŁKA Z OGRANICZONĄ ODPOWIEDZIALNOŚCIĄ ISTEBNA 593 43-470 ISTEBNA, Na rachunek: 80 1750 0009 0000 0000 1319 3274 NOVA GROUP A.CHMIELEVSKI SP. K, Tytuł: Faktura nr F/005981/25/SK z 14.10"
+  },
+  {
+    "date": "2025-10-22",
+    "amount": 855.59,
+    "type": "outgoing",
+    "contractor": "HIGA SAWOMIR MIKA",
+    "description": "PRZELEW ELIXIR - ONLINE, Z rachunku: 50 1090 1782 0000 0001 4836 9080 GOLDENPEAK III SPÓŁKA Z OGRANICZONĄ ODPOWIEDZIALNOŚCIĄ ISTEBNA 593 43-470 ISTEBNA, Na rachunek: 52 1050 1070 1000 0090 9247 9543 HIGA SAWOMIR MIKA, Tytuł: FV/259/2025/10 z 13.10"
+  },
+  {
+    "date": "2025-10-22",
+    "amount": 1725.01,
+    "type": "outgoing",
+    "contractor": "MARKET BUDOWLANY BAZA S.C.",
+    "description": "PRZELEW ELIXIR - ONLINE, Z rachunku: 50 1090 1782 0000 0001 4836 9080 GOLDENPEAK III SPÓŁKA Z OGRANICZONĄ ODPOWIEDZIALNOŚCIĄ ISTEBNA 593 43-470 ISTEBNA, Na rachunek: 16 1020 1390 0000 6202 0457 8177 MARKET BUDOWLANY BAZA S.C., Tytuł: Fv 278/10/2025 z 13.10"
+  },
+  {
+    "date": "2025-10-22",
+    "amount": 4028.88,
+    "type": "outgoing",
+    "contractor": "MARKET BUDOWLANY BAZA S.C.",
+    "description": "PRZELEW ELIXIR - ONLINE, Z rachunku: 04 1090 1782 0000 0001 5923 3714 GOLDENPEAK III SPÓŁKA Z OGRANICZONĄ ODPOWIEDZIALNOŚCIĄ ISTEBNA 593 43-470 ISTEBNA, Na rachunek: 16 1020 1390 0000 6202 0457 8177 MARKET BUDOWLANY BAZA S.C., Tytuł: Fv 279/10/2025 z 13.10"
+  },
+  {
+    "date": "2025-10-21",
+    "amount": 172.78,
+    "type": "outgoing",
+    "contractor": "GOLDENPEAK III SPÓŁKA Z OGRANICZONĄ ODPOWIEDZIALNOŚCIĄ ISTEBNA 593 43-470 ISTEBNA ŚLĄSKIE",
+    "description": "OBCIĄŻENIE VAT (SP), Z rachunku: 50 1090 1782 0000 0001 4836 9080 GOLDENPEAK III SPÓŁKA Z OGRANICZONĄ ODPOWIEDZIALNOŚCIĄ ISTEBNA 593 43-470 ISTEBNA, Na rachunek: 77 1090 1782 0000 0001 4836 9079 GOLDENPEAK III SPÓŁKA Z OGRANICZONĄ ODPOWIEDZIALNOŚCIĄ ISTEBNA 593 43-470 ISTEBNA ŚLĄSKIE, Tytuł: /VAT/172,78/IDC/5482 7376921/NV/478/2025/ GP3/TXT/Zapłata za Fa nr 478 /2025/GP3"
+  }
+]

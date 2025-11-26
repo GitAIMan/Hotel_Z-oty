@@ -1,0 +1,124 @@
+import { useState, createContext, useContext } from 'react';
+import InvoiceList from './components/InvoiceList';
+import SettlementList from './components/SettlementList';
+import HistoryList from './components/HistoryList';
+import { FileText, DollarSign, Clock, LayoutDashboard, Building2 } from 'lucide-react';
+
+// Context for Entity (Hotel)
+export const EntityContext = createContext();
+
+function App() {
+  const [activeTab, setActiveTab] = useState('invoices');
+  const [entity, setEntity] = useState('zloty_gron'); // 'zloty_gron' or 'srebrny_bucznik'
+
+  const TabButton = ({ id, label, icon: Icon }) => (
+    <button
+      onClick={() => setActiveTab(id)}
+      className={`relative flex items-center gap-3 px-8 py-5 text-lg font-medium transition-all duration-300 overflow-hidden
+        ${activeTab === id
+          ? 'text-gold-700 bg-gold-50/50'
+          : 'text-gray-500 hover:text-gold-600 hover:bg-white/50'
+        }
+      `}
+    >
+      <div className={`absolute left-0 top-0 bottom-0 w-1 bg-gold-500 transition-transform duration-300 ${activeTab === id ? 'scale-y-100' : 'scale-y-0'}`} />
+      <Icon size={24} className={activeTab === id ? 'text-gold-600' : 'text-gray-400'} />
+      <span className="font-serif tracking-wide">{label}</span>
+    </button>
+  );
+
+  return (
+    <EntityContext.Provider value={{ entity, setEntity }}>
+      <div className="min-h-screen bg-gray-50 bg-subtle-pattern text-gray-800 font-sans selection:bg-gold-200">
+
+        {/* Top Navigation Bar */}
+        <nav className="glass-card sticky top-0 z-50 border-b border-gold-100">
+          <div className="max-w-[95%] mx-auto px-8 py-6 flex items-center justify-between">
+
+            {/* Logo Area */}
+            <div className="flex items-center gap-6">
+              <div className="w-16 h-16 rounded-2xl bg-gold-gradient flex items-center justify-center shadow-lg shadow-gold-500/20">
+                <LayoutDashboard className="text-white" size={32} />
+              </div>
+              <div>
+                <h1 className="text-3xl font-bold text-gray-900 tracking-tight font-serif">
+                  <span className="text-gold-gradient">Złoty Groń</span>
+                </h1>
+                <p className="text-sm text-gold-600 font-bold tracking-[0.25em] uppercase mt-1">System Rozliczeń AI</p>
+              </div>
+            </div>
+
+            {/* Entity Switcher */}
+            <div className="flex bg-gray-100/50 p-1.5 rounded-xl border border-gray-200">
+              <button
+                onClick={() => setEntity('zloty_gron')}
+                className={`px-6 py-3 rounded-lg text-base font-medium transition-all duration-300 flex items-center gap-3
+                  ${entity === 'zloty_gron'
+                    ? 'bg-white text-gold-700 shadow-sm'
+                    : 'text-gray-500 hover:text-gray-700'
+                  }`}
+              >
+                <Building2 size={20} />
+                Złoty Groń
+              </button>
+              <button
+                onClick={() => setEntity('srebrny_bucznik')}
+                className={`px-6 py-3 rounded-lg text-base font-medium transition-all duration-300 flex items-center gap-3
+                  ${entity === 'srebrny_bucznik'
+                    ? 'bg-white text-gray-800 shadow-sm'
+                    : 'text-gray-500 hover:text-gray-700'
+                  }`}
+              >
+                <Building2 size={20} />
+                Srebrny Bucznik
+              </button>
+            </div>
+
+          </div>
+        </nav>
+
+        {/* Main Content */}
+        <main className="max-w-[95%] mx-auto px-8 py-12">
+
+          <div className="grid grid-cols-12 gap-10">
+            {/* Sidebar Navigation */}
+            <div className="col-span-2">
+              <div className="glass-card rounded-2xl overflow-hidden sticky top-36">
+                <div className="p-8 border-b border-gray-100 bg-gold-50/30">
+                  <p className="text-sm font-bold text-gray-400 uppercase tracking-wider">Menu Główne</p>
+                </div>
+                <div className="flex flex-col">
+                  <TabButton id="invoices" label="Faktury" icon={FileText} />
+                  <TabButton id="settlements" label="Rozliczenia" icon={DollarSign} />
+                  <TabButton id="history" label="Historia" icon={Clock} />
+                </div>
+                <div className="p-8 mt-4 border-t border-gray-100">
+                  <div className="bg-gradient-to-br from-gray-900 to-gray-800 rounded-xl p-6 text-white shadow-lg">
+                    <p className="text-xs text-gray-400 mb-2">Status AI</p>
+                    <div className="flex items-center gap-3">
+                      <div className="w-3 h-3 bg-green-400 rounded-full animate-pulse"></div>
+                      <span className="font-medium text-base">Claude 4.5 Sonnet</span>
+                    </div>
+                    <p className="text-xs text-gray-500 mt-3">Ready for Analysis</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Content Area */}
+            <div className="col-span-10">
+              <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
+                {activeTab === 'invoices' && <InvoiceList entity={entity} />}
+                {activeTab === 'settlements' && <SettlementList entity={entity} />}
+                {activeTab === 'history' && <HistoryList entity={entity} />}
+              </div>
+            </div>
+          </div>
+
+        </main>
+      </div>
+    </EntityContext.Provider>
+  );
+}
+
+export default App;

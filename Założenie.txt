@@ -1,0 +1,52 @@
+Dokumentacja Przekazania Projektu: System Faktur i Rozliczeń (AI)
+1. Cel Projektu
+Stworzenie inteligentnego systemu do automatyzacji obiegu faktur i rozliczania płatności dla grupy hoteli (Multi-Entity). System ma za zadanie zminimalizować ręczną pracę księgową poprzez wykorzystanie AI do ekstrakcji danych i parowania płatności.
+
+Główne Podmioty:
+
+Hotel Złoty Groń
+Srebrny Bucznik
+(Możliwość dodania kolejnych w przyszłości)
+2. Kluczowe Funkcjonalności (MVP)
+A. Moduł Faktur (AI OCR)
+Upload: Przesyłanie plików PDF/JPG (pojedyncze faktury lub paczki).
+Ekstrakcja AI: Wykorzystanie modelu Claude Sonnet 4.5 Thinking do odczytania:
+Numeru faktury, NIP-u, Dat (wystawienia, sprzedaży, płatności), Kwot (netto, VAT, brutto), Numeru konta, Kategorii kosztowej.
+Weryfikacja: Użytkownik musi mieć możliwość podejrzenia pliku i edycji danych przed zatwierdzeniem.
+Statusy: Nieopłacona / Opłacona / Częściowo opłacona.
+B. Moduł Rozliczeń (Bank Statements)
+Import: Wgrywanie wyciągów bankowych (PDF/CSV).
+Analiza AI: Ekstrakcja listy transakcji (Data, Kwota, Opis, Nadawca).
+Inteligentne Parowanie (Matching): System musi automatycznie łączyć płatności z fakturami.
+Scenariusz 1: Jedna płatność = Jedna faktura (proste).
+Scenariusz 2: Jedna płatność zbiorcza = Wiele faktur (tzw. "paczka przelewów"). System musi umieć "rozbić" kwotę płatności na kilka faktur na podstawie opisu lub kwot.
+Scenariusz 3: Częściowa płatność.
+C. Obsługa Wielu Podmiotów (Multi-Tenancy)
+Ścisła separacja danych między podmiotami (Faktura dla "Złoty Groń" nie może być widoczna ani rozliczana w "Srebrny Bucznik").
+Łatwe przełączanie się między kontekstami (Globalny przełącznik w UI).
+3. Rekomendacje Techniczne (Dla Nowego Projektu)
+Architektura
+Backend: Python (FastAPI/Django) lub Node.js. Ważne: Silne typowanie i dobra obsługa asynchroniczności (dla zapytań do AI).
+Baza Danych: PostgreSQL. Odradzam SQLite. Relacje są kluczowe (Faktura <-> Płatność <-> Rozliczenie).
+Migracje: OBOWIĄZKOWE (Alembic/Prisma). Projekt będzie ewoluował, brak systemu migracji w prototypie był głównym źródłem błędów (np. brakujące kolumny przy zmianach wymagań).
+Integracja AI
+Nie polegaj na prostym Regex. Faktury są zbyt różnorodne.
+Wysyłaj do AI obraz/PDF i oczekuj ustrukturyzowanego JSON-a.
+Wskazówka: Prompt dla AI musi być bardzo precyzyjny w kwestii formatowania dat (ISO 8601) i liczb (kropka jako separator dziesiętny).
+4. Pułapki i "Na co uważać" (Lessons Learned)
+Kodowanie Znaków (Headers): Unikaj przesyłania danych biznesowych (np. nazwy firmy z polskimi znakami) w nagłówkach HTTP (X-Entity). Powoduje to problemy z kodowaniem (ISO-8859-1). Przesyłaj kontekst w ciele żądania (JSON) lub w tokenie JWT.
+Spójność Bazy Danych: Przy wprowadzaniu obsługi wielu podmiotów, każda tabela (Faktury, Płatności, Rozliczenia) musi mieć kolumnę entity_id / podmiot. Zaniedbanie tego na początku prowadzi do bolesnych migracji danych.
+Logika Parowania: To najtrudniejsza część. Algorytm musi uwzględniać:
+Tolerancję kwotową (groszowe różnice).
+Szukanie numerów faktur w opisach przelewów (często zniekształconych).
+Daty (płatność może być przed lub po dacie faktury).
+CORS i Porty: Skonfiguruj poprawnie środowisko deweloperskie (Frontend i Backend na różnych portach to standard, ale wymaga poprawnego proxy/CORS).
+5. Design UI/UX
+Styl: Glassmorphism / Dark Mode (wymóg klienta).
+Responsywność: System musi być czytelny na desktopie.
+Feedback: Użytkownik musi widzieć postęp przetwarzania plików (to trwa kilka-kilkanaście sekund przez AI).
+6. Musi być faktyczna baza danych któa będzie przehowywać dane faktur i uwzględniać zapisane zmiany osoby obsługującej system. 0 DANYCH ZMYŚLONYCH I NIEPRAWDZIWYCH!
+
+Bardzo ważne: 
+
+Chcę zebys od początku rozbił to na taski, zrobił sekcje plików, żeby wsyztsko było posegregowane!
