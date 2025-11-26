@@ -169,21 +169,21 @@ function InvoiceList({ entity }) {
                     accept=".pdf,.jpg,.jpeg,.png"
                 />
 
-                <div className="flex flex-col items-center gap-8 pointer-events-none">
-                    <div className={`w-32 h-32 rounded-3xl flex items-center justify-center transition-all duration-500 ${isDragging ? 'bg-gold-500 text-white rotate-12' : 'bg-white shadow-xl text-gold-500 group-hover:scale-110'}`}>
+                <div className="flex flex-col items-center gap-4 lg:gap-8 pointer-events-none">
+                    <div className={`w-20 h-20 lg:w-32 lg:h-32 rounded-3xl flex items-center justify-center transition-all duration-500 ${isDragging ? 'bg-gold-500 text-white rotate-12' : 'bg-white shadow-xl text-gold-500 group-hover:scale-110'}`}>
                         {isAnalyzing ? (
-                            <Loader2 size={64} className="animate-spin" />
+                            <Loader2 size={32} className="animate-spin lg:w-16 lg:h-16" />
                         ) : (
-                            <UploadCloud size={64} />
+                            <UploadCloud size={32} className="lg:w-16 lg:h-16" />
                         )}
                     </div>
 
-                    <div className="space-y-4">
-                        <h3 className="text-4xl font-serif font-bold text-gray-800 group-hover:text-gold-700 transition-colors">
-                            {isAnalyzing ? 'Claude 4.5 Analizuje...' : 'Przeciągnij fakturę'}
+                    <div className="space-y-2 lg:space-y-4">
+                        <h3 className="text-xl lg:text-4xl font-serif font-bold text-gray-800 group-hover:text-gold-700 transition-colors">
+                            {isAnalyzing ? 'Analiza...' : 'Dodaj fakturę'}
                         </h3>
-                        <p className="text-gray-400 text-xl font-medium">
-                            {isAnalyzing ? 'Weryfikacja danych...' : 'PDF, JPG lub PNG'}
+                        <p className="text-gray-400 text-sm lg:text-xl font-medium">
+                            {isAnalyzing ? 'Przetwarzanie...' : 'Dotknij, aby wybrać plik'}
                         </p>
                     </div>
                 </div>
