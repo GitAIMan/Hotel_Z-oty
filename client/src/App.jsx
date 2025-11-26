@@ -78,11 +78,11 @@ function App() {
         </nav>
 
         {/* Main Content */}
-        <main className="max-w-[95%] mx-auto px-8 py-12">
+        <main className="max-w-[95%] mx-auto px-4 lg:px-8 py-6 lg:py-12 pb-24 lg:pb-12">
 
-          <div className="grid grid-cols-12 gap-10">
-            {/* Sidebar Navigation */}
-            <div className="col-span-2">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-10">
+            {/* Sidebar Navigation (Desktop) */}
+            <div className="hidden lg:block lg:col-span-2">
               <div className="glass-card rounded-2xl overflow-hidden sticky top-36">
                 <div className="p-8 border-b border-gray-100 bg-gold-50/30">
                   <p className="text-sm font-bold text-gray-400 uppercase tracking-wider">Menu Główne</p>
@@ -106,7 +106,7 @@ function App() {
             </div>
 
             {/* Content Area */}
-            <div className="col-span-10">
+            <div className="lg:col-span-10">
               <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
                 {activeTab === 'invoices' && <InvoiceList entity={entity} />}
                 {activeTab === 'settlements' && <SettlementList entity={entity} />}
@@ -116,8 +116,35 @@ function App() {
           </div>
 
         </main>
+
+
+        {/* Bottom Navigation (Mobile) */}
+        <div className="fixed bottom-0 left-0 right-0 bg-white/90 backdrop-blur-md border-t border-gold-100 p-2 flex justify-around items-center lg:hidden z-50 shadow-[0_-4px_20px_-5px_rgba(0,0,0,0.1)]">
+          <button
+            onClick={() => setActiveTab('invoices')}
+            className={`flex flex-col items-center gap-1 p-2 rounded-xl transition-colors w-20 ${activeTab === 'invoices' ? 'text-gold-600 bg-gold-50' : 'text-gray-400'}`}
+          >
+            <FileText size={24} />
+            <span className="text-[10px] font-bold uppercase tracking-wider">Faktury</span>
+          </button>
+          <button
+            onClick={() => setActiveTab('settlements')}
+            className={`flex flex-col items-center gap-1 p-2 rounded-xl transition-colors w-20 ${activeTab === 'settlements' ? 'text-gold-600 bg-gold-50' : 'text-gray-400'}`}
+          >
+            <DollarSign size={24} />
+            <span className="text-[10px] font-bold uppercase tracking-wider">Rozlicz</span>
+          </button>
+          <button
+            onClick={() => setActiveTab('history')}
+            className={`flex flex-col items-center gap-1 p-2 rounded-xl transition-colors w-20 ${activeTab === 'history' ? 'text-gold-600 bg-gold-50' : 'text-gray-400'}`}
+          >
+            <Clock size={24} />
+            <span className="text-[10px] font-bold uppercase tracking-wider">Historia</span>
+          </button>
+        </div>
+
       </div>
-    </EntityContext.Provider>
+    </EntityContext.Provider >
   );
 }
 

@@ -41,3 +41,8 @@
     - 🛡️ **Self-Healing Settlements**: Automatyczna naprawa spójności danych przy usuwaniu faktur (odparowywanie płatności).
     - 🔄 **Reverse Matching**: Nowe faktury są automatycznie parowane z istniejącymi, niesparowanymi płatnościami.
     - 🔧 **Backend Fixes**: Naprawa endpointów, wymuszenie portu 5173, stabilizacja serwera.
+- **v1.6** (26.11.2024 - Deployment & Cloud):
+    - 🚀 **GitHub Integration**: Pełna synchronizacja kodu z repozytorium `GitAIMan/Hotel_Z-oty`.
+    - ☁️ **Railway Deployment**: Aplikacja wdrożona na produkcję (Frontend + Backend).
+    - 🔧 **Config Fixes**: Dynamiczne porty (`process.env.PORT`), zmienne środowiskowe dla API (`VITE_API_URL`), naprawa CORS.
+    - 🛡️ **Security**: Klucze API przeniesione do bezpiecznych zmiennych środowiskowych Railway.
