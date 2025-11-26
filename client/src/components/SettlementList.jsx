@@ -137,20 +137,20 @@ function SettlementList({ entity }) {
 
             <div className="glass-card p-10 rounded-3xl shadow-xl border border-amber-200/50 bg-gradient-to-b from-white to-amber-50/30">
                 <h3 className="text-2xl font-bold font-serif mb-6 text-gray-800">Wgraj Wyciąg Bankowy</h3>
-                <form onSubmit={handleSubmit} className="flex gap-6 items-center">
+                <form onSubmit={handleSubmit} className="flex flex-col lg:flex-row gap-4 lg:gap-6 items-stretch lg:items-center">
                     <div className="flex-1 relative">
                         <input
                             id="settlement-file"
                             type="file"
                             onChange={handleFileChange}
-                            className="w-full p-4 border border-amber-100 rounded-2xl bg-white focus:outline-none focus:border-amber-400 transition-colors file:mr-6 file:py-3 file:px-6 file:rounded-xl file:border-0 file:text-base file:font-semibold file:bg-amber-50 file:text-amber-700 hover:file:bg-amber-100 text-lg shadow-sm"
+                            className="w-full p-4 border border-amber-100 rounded-2xl bg-white focus:outline-none focus:border-amber-400 transition-colors file:mr-4 lg:file:mr-6 file:py-2 lg:file:py-3 file:px-4 lg:file:px-6 file:rounded-xl file:border-0 file:text-sm lg:file:text-base file:font-semibold file:bg-amber-50 file:text-amber-700 hover:file:bg-amber-100 text-sm lg:text-lg shadow-sm"
                             accept=".csv,.xls,.xlsx,.pdf,.jpg,.png"
                         />
                     </div>
                     <button
                         type="submit"
                         disabled={!file || isAnalyzing}
-                        className={`px-8 py-4 rounded-2xl font-bold text-lg flex items-center gap-3 transition-all duration-300 ${!file || isAnalyzing
+                        className={`w-full lg:w-auto px-8 py-4 rounded-2xl font-bold text-lg flex items-center justify-center gap-3 transition-all duration-300 ${!file || isAnalyzing
                             ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
                             : 'bg-gold-gradient text-white shadow-xl shadow-gold-500/30 hover:shadow-gold-500/40 transform hover:-translate-y-1'
                             }`}
