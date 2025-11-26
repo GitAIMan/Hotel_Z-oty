@@ -9,7 +9,7 @@ const { initDb, Invoice, Settlement, History, sequelize } = require('./db');
 const { Op } = require('sequelize');
 
 const app = express();
-const PORT = 3001;
+const PORT = process.env.PORT || 3001;
 
 // Initialize Anthropic Client
 const anthropic = new Anthropic({
