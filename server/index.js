@@ -477,11 +477,8 @@ app.get('/api/settlements', async (req, res) => {
 
         res.json(settlements);
     } catch (err) {
+        res.status(500).json({ error: err.message });
     }
-
-} catch (err) {
-    res.status(500).json({ error: err.message });
-}
 });
 
 // 5b. Confirm Settlement (Step 2 of 2)
