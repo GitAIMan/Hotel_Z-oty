@@ -200,9 +200,9 @@ function InvoiceList({ entity }) {
                 isAnalyzing={isAnalyzing}
             />
 
-            {/* Drag & Drop Zone */}
+            {/* Drag & Drop Zone - Hidden on Mobile to prevent confusion with MobilePhotoUploader */}
             <div
-                className={`relative group cursor-pointer rounded-[2rem] border-4 border-dashed transition-all duration-500 p-8 lg:p-24 text-center
+                className={`hidden md:block relative group cursor-pointer rounded-[2rem] border-4 border-dashed transition-all duration-500 p-8 lg:p-24 text-center
           ${isDragging
                         ? 'border-gold-500 bg-gold-50/50 scale-[1.01] shadow-2xl shadow-gold-100'
                         : 'border-gray-200 hover:border-gold-400 hover:bg-white bg-white/60'
