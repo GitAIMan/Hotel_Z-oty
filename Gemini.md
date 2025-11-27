@@ -46,3 +46,9 @@
     - ☁️ **Railway Deployment**: Aplikacja wdrożona na produkcję (Frontend + Backend).
     - 🔧 **Config Fixes**: Dynamiczne porty (`process.env.PORT`), zmienne środowiskowe dla API (`VITE_API_URL`), naprawa CORS.
     - 🛡️ **Security**: Klucze API przeniesione do bezpiecznych zmiennych środowiskowych Railway.
+- **v1.7** (27.11.2024 - Features & Fixes):
+    - 📊 **CSV Settlements**: Obsługa plików Excel/CSV w rozliczeniach. Automatyczne mapowanie kolumn (Magazyn -> Kategoria, Brutto -> Kwota) i aktualizacja kategorii faktur w bazie.
+    - 📱 **Mobile Photo**: Dedykowany moduł "Zrób Zdjęcie" na telefony (Drawer). Możliwość zrobienia do 3 zdjęć (Przód/Tył/Aparat) i wysłania ich zbiorczo.
+    - 🛡️ **PDF Limits**: Blokada wgrywania plików PDF powyżej 3 stron (walidacja w przeglądarce).
+    - 🔧 **PDF Worker Fix**: Naprawa błędu 404 na produkcji poprzez lokalne wbudowanie `pdf.worker.min.js` (Vite asset bundling).
+    - 🧹 **VS Code Config**: Ukrycie ostrzeżeń Tailwind CSS w edytorze.
