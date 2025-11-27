@@ -2,12 +2,13 @@ import { useState, useEffect, useRef } from 'react';
 import api from '../api';
 import { UploadCloud, FileText, CheckCircle, Loader2, AlertCircle, Calendar, CreditCard, Trash2, Edit2 } from 'lucide-react';
 import * as pdfjsLib from 'pdfjs-dist';
+import pdfWorker from 'pdfjs-dist/build/pdf.worker.min.mjs?url';
 import InvoiceVerificationModal from './InvoiceVerificationModal';
 import InvoiceEditModal from './InvoiceEditModal';
 import MobilePhotoUploader from './MobilePhotoUploader';
 
 // Configure PDF.js worker
-pdfjsLib.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.js`;
+pdfjsLib.GlobalWorkerOptions.workerSrc = pdfWorker;
 
 function InvoiceList({ entity }) {
     const [invoices, setInvoices] = useState([]);
