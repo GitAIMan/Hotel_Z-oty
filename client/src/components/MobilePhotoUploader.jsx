@@ -43,9 +43,10 @@ function MobilePhotoUploader({ onUpload, isAnalyzing }) {
 
     const getLabel = (type) => {
         switch (type) {
-            case 'front': return 'Przód';
-            case 'back': return 'Tył';
-            default: return 'Aparat';
+            case 'page1': return 'Strona 1';
+            case 'page2': return 'Strona 2';
+            case 'page3': return 'Strona 3';
+            default: return 'Strona';
         }
     };
 
@@ -108,36 +109,36 @@ function MobilePhotoUploader({ onUpload, isAnalyzing }) {
                         {/* Action Buttons */}
                         <div className="grid grid-cols-3 gap-3 mb-8">
                             <button
-                                onClick={() => triggerCamera('front')}
+                                onClick={() => triggerCamera('page1')}
                                 disabled={photos.length >= 3}
                                 className="flex flex-col items-center gap-2 p-4 rounded-2xl bg-amber-50 text-amber-700 border border-amber-100 disabled:opacity-50 disabled:grayscale"
                             >
                                 <div className="p-3 bg-white rounded-full shadow-sm">
                                     <FileText size={20} />
                                 </div>
-                                <span className="text-xs font-bold">Przód</span>
+                                <span className="text-xs font-bold">Strona 1</span>
                             </button>
 
                             <button
-                                onClick={() => triggerCamera('back')}
+                                onClick={() => triggerCamera('page2')}
                                 disabled={photos.length >= 3}
                                 className="flex flex-col items-center gap-2 p-4 rounded-2xl bg-amber-50 text-amber-700 border border-amber-100 disabled:opacity-50 disabled:grayscale"
                             >
                                 <div className="p-3 bg-white rounded-full shadow-sm">
-                                    <RotateCcw size={20} />
+                                    <FileText size={20} />
                                 </div>
-                                <span className="text-xs font-bold">Tył</span>
+                                <span className="text-xs font-bold">Strona 2</span>
                             </button>
 
                             <button
-                                onClick={() => triggerCamera('camera')}
+                                onClick={() => triggerCamera('page3')}
                                 disabled={photos.length >= 3}
                                 className="flex flex-col items-center gap-2 p-4 rounded-2xl bg-amber-50 text-amber-700 border border-amber-100 disabled:opacity-50 disabled:grayscale"
                             >
                                 <div className="p-3 bg-white rounded-full shadow-sm">
-                                    <Camera size={20} />
+                                    <FileText size={20} />
                                 </div>
-                                <span className="text-xs font-bold">Aparat</span>
+                                <span className="text-xs font-bold">Strona 3</span>
                             </button>
                         </div>
 
@@ -146,8 +147,8 @@ function MobilePhotoUploader({ onUpload, isAnalyzing }) {
                             onClick={handleSubmit}
                             disabled={photos.length === 0 || isAnalyzing}
                             className={`w-full py-4 rounded-2xl font-bold text-lg flex items-center justify-center gap-2 shadow-lg ${photos.length === 0 || isAnalyzing
-                                    ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
-                                    : 'bg-gold-gradient text-white shadow-gold-500/30'
+                                ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                                : 'bg-gold-gradient text-white shadow-gold-500/30'
                                 }`}
                         >
                             {isAnalyzing ? <Loader2 className="animate-spin" /> : <Check />}
