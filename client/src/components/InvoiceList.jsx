@@ -1,8 +1,13 @@
 import { useState, useEffect, useRef } from 'react';
 import api from '../api';
 import { UploadCloud, FileText, CheckCircle, Loader2, AlertCircle, Calendar, CreditCard, Trash2, Edit2 } from 'lucide-react';
+import * as pdfjsLib from 'pdfjs-dist';
 import InvoiceVerificationModal from './InvoiceVerificationModal';
 import InvoiceEditModal from './InvoiceEditModal';
+import MobilePhotoUploader from './MobilePhotoUploader';
+
+// Configure PDF.js worker
+pdfjsLib.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.js`;
 
 function InvoiceList({ entity }) {
     const [invoices, setInvoices] = useState([]);
@@ -80,14 +85,37 @@ function InvoiceList({ entity }) {
         }
     };
 
-    const handleFileUpload = async (file) => {
+    const handleFileUpload = async (filesInput) => {
+        const files = Array.isArray(filesInput) ? filesInput : [filesInput];
+
+        // PDF Page Limit Check (only for single PDF upload scenario usually, but let's check all)
+        for (const file of files) {
+            if (file.type === 'application/pdf') {
+                try {
+                    const arrayBuffer = await file.arrayBuffer();
+                    const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+                    if (pdf.numPages > 3) {
+                        alert(`Błąd: Plik ${file.name} ma ${pdf.numPages} stron. Maksymalna dozwolona liczba to 3.`);
+                        return;
+                    }
+                } catch (error) {
+                    console.error("Error checking PDF pages:", error);
+                    alert("Błąd podczas weryfikacji pliku PDF. Upewnij się, że plik jest poprawny.");
+                    return;
+                }
+            }
+        }
+
         setIsAnalyzing(true);
         const data = new FormData();
-        data.append('file', file);
+        files.forEach(file => {
+            data.append('files', file); // Use 'files' key for array
+        });
         data.append('entity', entity);
 
         try {
             // Step 1: Analyze
+            // Note: We changed endpoint to accept 'files' array in backend
             const response = await api.post('/invoices/analyze', data, {
                 headers: { 'Content-Type': 'multipart/form-data' }
             });
@@ -146,6 +174,29 @@ function InvoiceList({ entity }) {
                 onConfirm={handleUpdateInvoice}
                 invoice={editingInvoice}
                 isSubmitting={isSaving}
+            />
+
+            {/* Edit Modal */}
+            <InvoiceEditModal
+                isOpen={!!editingInvoice}
+                onClose={() => setEditingInvoice(null)}
+                onConfirm={handleUpdateInvoice}
+                invoice={editingInvoice}
+                isSubmitting={isSaving}
+            />
+
+            {/* Mobile Photo Uploader */}
+            <MobilePhotoUploader
+                onUpload={(files) => {
+                    // Handle array of files
+                    // We need to modify handleFileUpload to accept array or single file
+                    // But handleFileUpload expects a single file currently.
+                    // Let's modify handleFileUpload to handle array.
+                    if (files.length > 0) {
+                        handleFileUpload(files);
+                    }
+                }}
+                isAnalyzing={isAnalyzing}
             />
 
             {/* Drag & Drop Zone */}

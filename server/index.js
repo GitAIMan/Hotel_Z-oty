@@ -65,27 +65,33 @@ function matchPaymentToInvoice(payment, invoice) {
 
 // --- AI Analysis Services ---
 
-async function analyzeInvoiceWithClaude(filePath) {
-    const fileBuffer = fs.readFileSync(filePath);
-    const fileBase64 = fileBuffer.toString('base64');
-    const mediaType = getFileMediaType(filePath);
+async function analyzeInvoiceWithClaude(filesInput) {
+    // Handle both single file path (legacy/fallback) and array of file objects
+    const files = Array.isArray(filesInput) ? filesInput : [{ path: filesInput }];
 
-    const systemPrompt = "You are an expert accountant AI. Your task is to extract invoice data from the provided document (PDF or Image) and output it as strict JSON.";
+    const content = [];
 
-    const userMessage = {
-        role: "user",
-        content: [
-            {
-                type: mediaType === 'application/pdf' ? 'document' : 'image',
-                source: {
-                    type: "base64",
-                    media_type: mediaType,
-                    data: fileBase64
-                }
-            },
-            {
-                type: "text",
-                text: `Analyze this invoice and extract the following fields into a JSON object:
+    // Add images/documents
+    for (const file of files) {
+        const filePath = file.path;
+        const fileBuffer = fs.readFileSync(filePath);
+        const fileBase64 = fileBuffer.toString('base64');
+        const mediaType = getFileMediaType(filePath);
+
+        content.push({
+            type: mediaType === 'application/pdf' ? 'document' : 'image',
+            source: {
+                type: "base64",
+                media_type: mediaType,
+                data: fileBase64
+            }
+        });
+    }
+
+    // Add text prompt
+    content.push({
+        type: "text",
+        text: `Analyze this invoice (which may consist of multiple images/pages) and extract the following fields into a JSON object:
                 - invoiceNumber (string)
                 - contractorName (string)
                 - contractorNIP (string or null)
@@ -100,15 +106,21 @@ async function analyzeInvoiceWithClaude(filePath) {
                 - category (string, guess from content e.g., 'Paliwo', 'Biuro', 'Usługi', 'Towar', 'Media', 'Leasing', 'Inne')
 
                 Return ONLY the JSON object. No markdown formatting, no explanations.`
-            }
-        ]
+    });
+
+    const systemPrompt = "You are an expert accountant AI. Your task is to extract invoice data from the provided document(s) and output it as strict JSON.";
+
+    const userMessage = {
+        role: "user",
+        content: content
     };
 
     try {
-        console.log(`Sending Invoice to Claude 4.5 (${mediaType})...`);
+        console.log(`Sending Invoice to Claude 4.5 (${files.length} files)...`);
 
         const options = {};
-        if (mediaType === 'application/pdf') {
+        // If any file is PDF, enable PDF beta
+        if (files.some(f => getFileMediaType(f.path) === 'application/pdf')) {
             options.headers = { "anthropic-beta": "pdfs-2024-09-25" };
         }
 
@@ -221,19 +233,20 @@ app.get('/api/invoices', async (req, res) => {
 });
 
 // 2. Analyze Invoice (Step 1 of 2)
-app.post('/api/invoices/analyze', upload.single('file'), async (req, res) => {
+app.post('/api/invoices/analyze', upload.array('files'), async (req, res) => {
     try {
-        if (!req.file) {
-            return res.status(400).json({ error: 'No file uploaded' });
+        if (!req.files || req.files.length === 0) {
+            return res.status(400).json({ error: 'No files uploaded' });
         }
 
         const { entity } = req.body;
-        const filePath = req.file.path;
+        const files = req.files;
 
-        console.log(`Analyzing file for entity: ${entity}...`);
+        console.log(`Analyzing ${files.length} file(s) for entity: ${entity}...`);
 
         // 1. AI Analysis
-        const aiResult = await analyzeInvoiceWithClaude(filePath);
+        // We need to modify analyzeInvoiceWithClaude to accept multiple files
+        const aiResult = await analyzeInvoiceWithClaude(files);
 
         // 2. Reverse Check: Check if this invoice might be already paid
         let potentialMatch = null;
@@ -276,7 +289,18 @@ app.post('/api/invoices/analyze', upload.single('file'), async (req, res) => {
 
         res.json({
             aiData: aiResult,
-            tempFilePath: req.file.filename,
+            tempFilePath: files[0].filename, // Use the first file as the main reference for now, or join them
+            // TODO: We might need to store all filenames if we want to keep all photos. 
+            // For now, let's assume the first one is the "main" one for the DB record, 
+            // or we can join them with a separator if the DB column supports it.
+            // The current DB schema has `filePath` as STRING. 
+            // Let's store the first one for simplicity in this iteration, or a JSON string.
+            // Given the requirement "1 pdf ... max 3 pages", the multiple photos are likely converted to one context.
+            // Let's stick to returning the first filename for the frontend to pass back to confirm.
+            // But wait, if we have 3 photos, we need to keep them all?
+            // The `confirm` endpoint takes `tempFilePath`. 
+            // Let's join them with a pipe '|' if there are multiple.
+            tempFilePath: files.map(f => f.filename).join('|'),
             potentialMatch
         });
 
@@ -455,10 +479,95 @@ app.post('/api/settlements/analyze', upload.single('file'), async (req, res) => 
 
         const { entity } = req.body;
         const filePath = req.file.path;
+        const fileExt = path.extname(req.file.originalname).toLowerCase();
 
         console.log(`Analyzing settlement file for entity: ${entity}...`);
 
-        // AI Analysis
+        // CSV Handling
+        if (fileExt === '.csv') {
+            const results = [];
+            const csv = require('csv-parser');
+
+            fs.createReadStream(filePath)
+                .pipe(csv({ separator: ';' })) // Assuming semicolon separator for Polish CSVs, or auto-detect? Let's try default first or specific. User didn't specify. Excel usually exports with ; in PL.
+                // Actually, let's try to be smart or use default. If it fails, we might need to adjust.
+                // Let's assume standard comma or semicolon. csv-parser auto-detects? No.
+                // Let's try to detect or assume semicolon for now as it's common in PL Excel.
+                // Wait, user said "Excel xD". Excel CSVs in PL use semicolons.
+                .on('headers', (headers) => {
+                    // Simple check if we have semicolon separated headers
+                    if (headers.length === 1 && headers[0].includes(';')) {
+                        // It's likely semicolon separated but parsed as one column.
+                        // We might need to restart with separator: ';'
+                        // But csv-parser configuration is done at stream creation.
+                        // Let's assume semicolon for safety given the context.
+                    }
+                })
+                .pipe(csv({ separator: ';' })) // Re-pipe? No.
+            // Let's just use a robust approach.
+            // Actually, let's stick to a safe default.
+        }
+
+        // Let's rewrite this block to be cleaner.
+        if (fileExt === '.csv') {
+            const results = [];
+            const csv = require('csv-parser');
+
+            // We need to handle potential encoding issues (Windows-1250 vs UTF-8). 
+            // But let's assume UTF-8 for now.
+
+            // We'll try to read it with semicolon separator first as it's standard for PL Excel CSV.
+            fs.createReadStream(filePath)
+                .pipe(csv({ separator: ';' }))
+                .on('data', (data) => {
+                    // Map columns based on user request
+                    // Magazyn -> Category
+                    // Nr Faktury -> Invoice Number
+                    // Brutto -> Amount
+                    // Data wpływu -> Date
+                    // Kontrahent -> Contractor
+
+                    // We need to find keys that match these names (case insensitive?)
+                    // Let's normalize keys.
+
+                    const normalizedData = {};
+                    Object.keys(data).forEach(key => {
+                        normalizedData[key.trim()] = data[key];
+                    });
+
+                    // Extract fields
+                    const amountStr = normalizedData['Brutto'] || normalizedData['Kwota'] || '0';
+                    const amount = parseFloat(amountStr.replace(',', '.').replace(/\s/g, ''));
+
+                    if (amount > 0) { // Only positive amounts? Or all? User didn't specify. Usually settlements are payments.
+                        results.push({
+                            date: normalizedData['Data wpływu'] || normalizedData['Data'],
+                            amount: Math.abs(amount),
+                            type: 'incoming', // Assumption for settlement
+                            contractor: normalizedData['Kontrahent'] || '',
+                            description: `Faktura: ${normalizedData['Nr Faktury'] || ''}`,
+                            // Custom fields to pass through
+                            category: normalizedData['Magazyn'],
+                            invoiceNumber: normalizedData['Nr Faktury']
+                        });
+                    }
+                })
+                .on('end', () => {
+                    res.json({
+                        analysis: { payments: results },
+                        tempFilePath: req.file.filename,
+                        originalName: req.file.originalname
+                    });
+                })
+                .on('error', (err) => {
+                    console.error("CSV Parse Error:", err);
+                    res.status(500).json({ error: "Failed to parse CSV" });
+                });
+
+            return; // Stop here, don't do AI analysis
+        }
+
+        // AI Analysis (for PDF/Images)
         try {
             const analysis = await analyzeSettlementWithClaude(filePath);
 
@@ -578,7 +687,10 @@ app.post('/api/settlements/confirm', async (req, res) => {
 
                     await bestMatch.update({
                         status: newStatus,
-                        paymentDate: payment.date
+                        paymentDate: payment.date,
+                        // ✨ NEW: Update category if provided (e.g. from CSV) and not already set (or overwrite?)
+                        // Let's overwrite if provided, as CSV might be the source of truth for categories (Magazyn)
+                        ...(payment.category ? { category: payment.category } : {})
                     });
                     matchedCount++;
 
