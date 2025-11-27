@@ -149,27 +149,33 @@ async function analyzeInvoiceWithClaude(filesInput) {
     }
 }
 
-async function analyzeSettlementWithClaude(filePath) {
-    const fileBuffer = fs.readFileSync(filePath);
-    const fileBase64 = fileBuffer.toString('base64');
-    const mediaType = getFileMediaType(filePath);
+async function analyzeSettlementWithClaude(filesInput) {
+    // Handle both single file path (legacy/fallback) and array of file objects
+    const files = Array.isArray(filesInput) ? filesInput : [{ path: filesInput }];
 
-    const systemPrompt = "You are an expert accountant AI. Analyze this bank statement (image or PDF) and extract all transaction rows. Return strict JSON.";
+    const content = [];
 
-    const userMessage = {
-        role: "user",
-        content: [
-            {
-                type: mediaType === 'application/pdf' ? 'document' : 'image',
-                source: {
-                    type: "base64",
-                    media_type: mediaType,
-                    data: fileBase64
-                }
-            },
-            {
-                type: "text",
-                text: `Extract all payments/transactions from this document. 
+    // Add images/documents
+    for (const file of files) {
+        const filePath = file.path;
+        const fileBuffer = fs.readFileSync(filePath);
+        const fileBase64 = fileBuffer.toString('base64');
+        const mediaType = getFileMediaType(filePath);
+
+        content.push({
+            type: mediaType === 'application/pdf' ? 'document' : 'image',
+            source: {
+                type: "base64",
+                media_type: mediaType,
+                data: fileBase64
+            }
+        });
+    }
+
+    // Add text prompt
+    content.push({
+        type: "text",
+        text: `Extract all payments/transactions from this document (which may consist of multiple images/pages). 
                 Return a JSON object with a key "payments" containing an array of transactions.
                 Each transaction must have:
                 - date (YYYY-MM-DD)
@@ -179,15 +185,20 @@ async function analyzeSettlementWithClaude(filePath) {
                 - description (string)
                 
                 Return ONLY the JSON object.`
-            }
-        ]
+    });
+
+    const systemPrompt = "You are an expert accountant AI. Analyze this bank statement (image or PDF) and extract all transaction rows. Return strict JSON.";
+
+    const userMessage = {
+        role: "user",
+        content: content
     };
 
     try {
-        console.log(`Sending Settlement to Claude 4.5 (${mediaType})...`);
+        console.log(`Sending Settlement to Claude 4.5 (${files.length} files)...`);
 
         const options = {};
-        if (mediaType === 'application/pdf') {
+        if (files.some(f => getFileMediaType(f.path) === 'application/pdf')) {
             options.headers = { "anthropic-beta": "pdfs-2024-09-25" };
         }
 
@@ -466,125 +477,11 @@ app.get('/api/settlements', async (req, res) => {
 
         res.json(settlements);
     } catch (err) {
-        res.status(500).json({ error: err.message });
     }
-});
 
-// 5. Analyze Settlement (Step 1 of 2)
-app.post('/api/settlements/analyze', upload.single('file'), async (req, res) => {
-    try {
-        if (!req.file) {
-            return res.status(400).json({ error: 'No file uploaded' });
-        }
-
-        const { entity } = req.body;
-        const filePath = req.file.path;
-        const fileExt = path.extname(req.file.originalname).toLowerCase();
-
-        console.log(`Analyzing settlement file for entity: ${entity}...`);
-
-        // CSV Handling
-        if (fileExt === '.csv') {
-            const results = [];
-            const csv = require('csv-parser');
-
-            fs.createReadStream(filePath)
-                .pipe(csv({ separator: ';' })) // Assuming semicolon separator for Polish CSVs, or auto-detect? Let's try default first or specific. User didn't specify. Excel usually exports with ; in PL.
-                // Actually, let's try to be smart or use default. If it fails, we might need to adjust.
-                // Let's assume standard comma or semicolon. csv-parser auto-detects? No.
-                // Let's try to detect or assume semicolon for now as it's common in PL Excel.
-                // Wait, user said "Excel xD". Excel CSVs in PL use semicolons.
-                .on('headers', (headers) => {
-                    // Simple check if we have semicolon separated headers
-                    if (headers.length === 1 && headers[0].includes(';')) {
-                        // It's likely semicolon separated but parsed as one column.
-                        // We might need to restart with separator: ';'
-                        // But csv-parser configuration is done at stream creation.
-                        // Let's assume semicolon for safety given the context.
-                    }
-                })
-                .pipe(csv({ separator: ';' })) // Re-pipe? No.
-            // Let's just use a robust approach.
-            // Actually, let's stick to a safe default.
-        }
-
-        // Let's rewrite this block to be cleaner.
-        if (fileExt === '.csv') {
-            const results = [];
-            const csv = require('csv-parser');
-
-            // We need to handle potential encoding issues (Windows-1250 vs UTF-8). 
-            // But let's assume UTF-8 for now.
-
-            // We'll try to read it with semicolon separator first as it's standard for PL Excel CSV.
-            fs.createReadStream(filePath)
-                .pipe(csv({ separator: ';' }))
-                .on('data', (data) => {
-                    // Map columns based on user request
-                    // Magazyn -> Category
-                    // Nr Faktury -> Invoice Number
-                    // Brutto -> Amount
-                    // Data wpływu -> Date
-                    // Kontrahent -> Contractor
-
-                    // We need to find keys that match these names (case insensitive?)
-                    // Let's normalize keys.
-
-                    const normalizedData = {};
-                    Object.keys(data).forEach(key => {
-                        normalizedData[key.trim()] = data[key];
-                    });
-
-                    // Extract fields
-                    const amountStr = normalizedData['Brutto'] || normalizedData['Kwota'] || '0';
-                    const amount = parseFloat(amountStr.replace(',', '.').replace(/\s/g, ''));
-
-                    if (amount > 0) { // Only positive amounts? Or all? User didn't specify. Usually settlements are payments.
-                        results.push({
-                            date: normalizedData['Data wpływu'] || normalizedData['Data'],
-                            amount: Math.abs(amount),
-                            type: 'incoming', // Assumption for settlement
-                            contractor: normalizedData['Kontrahent'] || '',
-                            description: `Faktura: ${normalizedData['Nr Faktury'] || ''}`,
-                            // Custom fields to pass through
-                            category: normalizedData['Magazyn'],
-                            invoiceNumber: normalizedData['Nr Faktury']
-                        });
-                    }
-                })
-                .on('end', () => {
-                    res.json({
-                        analysis: { payments: results },
-                        tempFilePath: req.file.filename,
-                        originalName: req.file.originalname
-                    });
-                })
-                .on('error', (err) => {
-                    console.error("CSV Parse Error:", err);
-                    res.status(500).json({ error: "Failed to parse CSV" });
-                });
-
-            return; // Stop here, don't do AI analysis
-        }
-
-        // AI Analysis (for PDF/Images)
-        try {
-            const analysis = await analyzeSettlementWithClaude(filePath);
-
-            res.json({
-                analysis,
-                tempFilePath: req.file.filename,
-                originalName: req.file.originalname
-            });
-
-        } catch (aiError) {
-            console.error("Settlement analysis error:", aiError);
-            res.status(500).json({ error: `AI Analysis Failed: ${aiError.message}` });
-        }
-
-    } catch (err) {
-        res.status(500).json({ error: err.message });
-    }
+} catch (err) {
+    res.status(500).json({ error: err.message });
+}
 });
 
 // 5b. Confirm Settlement (Step 2 of 2)

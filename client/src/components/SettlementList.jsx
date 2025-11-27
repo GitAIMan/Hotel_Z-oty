@@ -3,6 +3,7 @@ import api from '../api';
 import { Upload, FileSpreadsheet, Trash2, Loader2, Eye } from 'lucide-react';
 import SettlementVerificationModal from './SettlementVerificationModal';
 import SettlementDetailsModal from './SettlementDetailsModal';
+import MobilePhotoUploader from './MobilePhotoUploader';
 
 function SettlementList({ entity }) {
     const [settlements, setSettlements] = useState([]);
@@ -57,7 +58,10 @@ function SettlementList({ entity }) {
         console.log("Starting settlement upload...");
         setIsAnalyzing(true);
         const data = new FormData();
-        data.append('file', file);
+        data.append('files', file); // Backend now expects 'files' array, but single file works too if we handle it right? 
+        // Wait, multer.array('files') expects 'files' field. 
+        // If we send 'file' field, it might fail.
+        // Let's change this to 'files'.
         data.append('entity', entity);
 
         try {
@@ -135,7 +139,51 @@ function SettlementList({ entity }) {
                 settlement={selectedSettlement}
             />
 
-            <div className="glass-card p-10 rounded-3xl shadow-xl border border-amber-200/50 bg-gradient-to-b from-white to-amber-50/30">
+            {/* Mobile Photo Uploader */}
+            <MobilePhotoUploader
+                onUpload={(files) => {
+                    if (files.length > 0) {
+                        // Create a synthetic event or call a new handler
+                        // Let's create a dedicated handler for array upload
+                        const handleMobileUpload = async (files) => {
+                            console.log("Starting mobile settlement upload...", files.length);
+                            setIsAnalyzing(true);
+                            const data = new FormData();
+                            files.forEach(file => {
+                                data.append('files', file);
+                            });
+                            data.append('entity', entity);
+
+                            try {
+                                const response = await api.post('/settlements/analyze', data, {
+                                    headers: { 'Content-Type': 'multipart/form-data' }
+                                });
+
+                                if (!response.data || !response.data.analysis) {
+                                    alert("Błąd: Otrzymano nieprawidłową odpowiedź z serwera.");
+                                    return;
+                                }
+
+                                setVerificationData(response.data.analysis);
+                                setTempFilePath(response.data.tempFilePath);
+                                setOriginalName(response.data.originalName);
+                                setShowVerificationModal(true);
+
+                            } catch (error) {
+                                console.error('Error analyzing settlement:', error);
+                                const errorMessage = error.response?.data?.error || error.message || 'Nieznany błąd';
+                                alert(`Błąd podczas analizy pliku: ${errorMessage}`);
+                            } finally {
+                                setIsAnalyzing(false);
+                            }
+                        };
+                        handleMobileUpload(files);
+                    }
+                }}
+                isAnalyzing={isAnalyzing}
+            />
+
+            <div className="hidden md:block glass-card p-10 rounded-3xl shadow-xl border border-amber-200/50 bg-gradient-to-b from-white to-amber-50/30">
                 <h3 className="text-2xl font-bold font-serif mb-6 text-gray-800">Wgraj Wyciąg Bankowy</h3>
                 <form onSubmit={handleSubmit} className="flex flex-col lg:flex-row gap-4 lg:gap-6 items-stretch lg:items-center">
                     <div className="flex-1 relative">
