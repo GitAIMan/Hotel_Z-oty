@@ -484,6 +484,33 @@ app.get('/api/settlements', async (req, res) => {
     }
 });
 
+// 5a. Analyze Settlement (Step 1 of 2)
+app.post('/api/settlements/analyze', upload.array('files'), async (req, res) => {
+    try {
+        if (!req.files || req.files.length === 0) {
+            return res.status(400).json({ error: 'No files uploaded' });
+        }
+
+        const { entity } = req.body;
+        const files = req.files;
+
+        console.log(`Analyzing settlement ${files.length} file(s) for entity: ${entity}...`);
+
+        // 1. AI Analysis
+        const aiResult = await analyzeSettlementWithClaude(files);
+
+        res.json({
+            aiData: aiResult,
+            tempFilePath: files.map(f => f.filename).join('|'),
+            originalName: files[0].originalname
+        });
+
+    } catch (err) {
+        console.error("Settlement analysis failed:", err);
+        res.status(500).json({ error: err.message });
+    }
+});
+
 // 5b. Confirm Settlement (Step 2 of 2)
 app.post('/api/settlements/confirm', async (req, res) => {
     try {
