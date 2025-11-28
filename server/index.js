@@ -807,10 +807,6 @@ app.get('*', (req, res) => {
     res.sendFile(path.join(__dirname, '../client/dist/index.html'));
 });
 
-app.listen(PORT, () => {
-    console.log(`Server running on port ${PORT}`);
-});
-
 // 11. Clear History
 app.delete('/api/history', async (req, res) => {
     const { entity } = req.query;
