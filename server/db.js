@@ -1,12 +1,32 @@
 const { Sequelize, DataTypes } = require('sequelize');
 const path = require('path');
 
-// Initialize SQLite database
-const sequelize = new Sequelize({
-  dialect: 'sqlite',
-  storage: path.join(__dirname, 'database.sqlite'),
-  logging: false
-});
+// Initialize database - PostgreSQL (production) or SQLite (local dev)
+let sequelize;
+
+if (process.env.DATABASE_URL) {
+  // Production: PostgreSQL on Railway
+  console.log('🐘 Connecting to PostgreSQL...');
+  sequelize = new Sequelize(process.env.DATABASE_URL, {
+    dialect: 'postgres',
+    protocol: 'postgres',
+    dialectOptions: {
+      ssl: {
+        require: true,
+        rejectUnauthorized: false // Railway requires SSL but uses self-signed certs
+      }
+    },
+    logging: false
+  });
+} else {
+  // Development: SQLite local file
+  console.log('📁 Connecting to SQLite (local dev)...');
+  sequelize = new Sequelize({
+    dialect: 'sqlite',
+    storage: path.join(__dirname, 'database.sqlite'),
+    logging: false
+  });
+}
 
 // Define Models
 
@@ -150,11 +170,17 @@ const History = sequelize.define('History', {
 // Sync database
 const initDb = async () => {
   try {
+    // Test connection first
+    await sequelize.authenticate();
+    const dbType = process.env.DATABASE_URL ? 'PostgreSQL' : 'SQLite';
+    console.log(`✅ Connected to ${dbType} successfully!`);
+
     // alter: true pozwala na aktualizację tabel bez utraty danych (dodanie nowych kolumn)
     await sequelize.sync({ alter: true });
-    console.log('Database synced successfully (Schema updated).');
+    console.log('✅ Database synced successfully (Schema updated).');
   } catch (error) {
-    console.error('Unable to sync database:', error);
+    console.error('❌ Unable to connect/sync database:', error);
+    throw error;
   }
 };
 
