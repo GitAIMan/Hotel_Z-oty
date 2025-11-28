@@ -219,7 +219,7 @@ function InvoiceList({ entity }) {
 
             {/* Drag & Drop Zone - Hidden on Mobile to prevent confusion with MobilePhotoUploader */}
             <div
-                className={`hidden md:block relative group cursor-pointer rounded-[2rem] border-4 border-dashed transition-all duration-500 p-8 lg:p-24 text-center
+                className={`hidden md:block relative group cursor-pointer rounded-[2rem] border-4 border-dashed transition-all duration-500 p-8 lg:p-12 text-center
           ${isDragging
                         ? 'border-gold-500 bg-gold-50/50 scale-[1.01] shadow-2xl shadow-gold-100'
                         : 'border-gray-200 hover:border-gold-400 hover:bg-white bg-white/60'
@@ -238,21 +238,21 @@ function InvoiceList({ entity }) {
                     accept=".pdf,.jpg,.jpeg,.png"
                 />
 
-                <div className="flex flex-col items-center gap-4 lg:gap-8 pointer-events-none">
-                    <div className={`w-20 h-20 lg:w-32 lg:h-32 rounded-3xl flex items-center justify-center transition-all duration-500 ${isDragging ? 'bg-gold-500 text-white rotate-12' : 'bg-white shadow-xl text-gold-500 group-hover:scale-110'}`}>
+                <div className="flex flex-col items-center gap-4 lg:gap-6 pointer-events-none">
+                    <div className={`w-16 h-16 lg:w-20 lg:h-20 rounded-2xl flex items-center justify-center transition-all duration-500 ${isDragging ? 'bg-gold-500 text-white rotate-12' : 'bg-white shadow-xl text-gold-500 group-hover:scale-110'}`}>
                         {isAnalyzing ? (
-                            <Loader2 size={32} className="animate-spin lg:w-16 lg:h-16" />
+                            <Loader2 size={32} className="animate-spin" />
                         ) : (
-                            <UploadCloud size={32} className="lg:w-16 lg:h-16" />
+                            <UploadCloud size={32} />
                         )}
                     </div>
 
-                    <div className="space-y-2 lg:space-y-4">
-                        <h3 className="text-xl lg:text-4xl font-serif font-bold text-gray-800 group-hover:text-gold-700 transition-colors">
+                    <div className="space-y-2">
+                        <h3 className="text-xl lg:text-2xl font-serif font-bold text-gray-800 group-hover:text-gold-700 transition-colors">
                             {isAnalyzing ? 'Analiza...' : 'Dodaj fakturę'}
                         </h3>
-                        <p className="text-gray-400 text-sm lg:text-xl font-medium">
-                            {isAnalyzing ? 'Przetwarzanie...' : 'Dotknij, aby wybrać plik'}
+                        <p className="text-gray-400 text-sm lg:text-base font-medium">
+                            {isAnalyzing ? 'Przetwarzanie...' : 'Kliknij lub upuść plik tutaj'}
                         </p>
                     </div>
                 </div>

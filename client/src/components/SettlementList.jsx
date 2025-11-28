@@ -9,6 +9,7 @@ function SettlementList({ entity }) {
     const [settlements, setSettlements] = useState([]);
     const [file, setFile] = useState(null);
     const [isAnalyzing, setIsAnalyzing] = useState(false);
+    const [isDragging, setIsDragging] = useState(false);
 
     // Verification State
     const [showVerificationModal, setShowVerificationModal] = useState(false);
@@ -46,6 +47,58 @@ function SettlementList({ entity }) {
 
     const handleFileChange = (e) => {
         setFile(e.target.files[0]);
+    };
+
+    const handleDragOver = (e) => {
+        e.preventDefault();
+        setIsDragging(true);
+    };
+
+    const handleDragLeave = () => {
+        setIsDragging(false);
+    };
+
+    const handleDrop = (e) => {
+        e.preventDefault();
+        setIsDragging(false);
+        const files = e.dataTransfer.files;
+        if (files.length > 0) {
+            handleDirectUpload(files[0]);
+        }
+    };
+
+    const handleDirectUpload = async (uploadedFile) => {
+        if (!uploadedFile) return;
+
+        console.log("Starting settlement upload...", uploadedFile.name);
+        setIsAnalyzing(true);
+        const data = new FormData();
+        data.append('files', uploadedFile);
+        data.append('entity', entity);
+
+        try {
+            console.log("Sending request to /api/settlements/analyze...");
+            const response = await api.post('/settlements/analyze', data, {
+                headers: { 'Content-Type': 'multipart/form-data' }
+            });
+
+            if (!response.data || !response.data.analysis) {
+                alert("Błąd: Otrzymano nieprawidłową odpowiedź z serwera.");
+                return;
+            }
+
+            setVerificationData(response.data.analysis);
+            setTempFilePath(response.data.tempFilePath);
+            setOriginalName(response.data.originalName);
+            setShowVerificationModal(true);
+
+        } catch (error) {
+            console.error('Error analyzing settlement:', error);
+            const errorMessage = error.response?.data?.error || error.message || 'Nieznany błąd';
+            alert(`Błąd podczas analizy pliku: ${errorMessage}`);
+        } finally {
+            setIsAnalyzing(false);
+        }
     };
 
     const handleSubmit = async (e) => {
@@ -183,30 +236,58 @@ function SettlementList({ entity }) {
                 isAnalyzing={isAnalyzing}
             />
 
-            <div className="hidden md:block glass-card p-10 rounded-3xl shadow-xl border border-amber-200/50 bg-gradient-to-b from-white to-amber-50/30">
-                <h3 className="text-2xl font-bold font-serif mb-6 text-gray-800">Wgraj Wyciąg Bankowy</h3>
-                <form onSubmit={handleSubmit} className="flex flex-col lg:flex-row gap-4 lg:gap-6 items-stretch lg:items-center">
-                    <div className="flex-1 relative">
-                        <input
-                            id="settlement-file"
-                            type="file"
-                            onChange={handleFileChange}
-                            className="w-full p-4 border border-amber-100 rounded-2xl bg-white focus:outline-none focus:border-amber-400 transition-colors file:mr-4 lg:file:mr-6 file:py-2 lg:file:py-3 file:px-4 lg:file:px-6 file:rounded-xl file:border-0 file:text-sm lg:file:text-base file:font-semibold file:bg-amber-50 file:text-amber-700 hover:file:bg-amber-100 text-sm lg:text-lg shadow-sm"
-                            accept=".csv,.xls,.xlsx,.pdf,.jpg,.png"
-                        />
+            {/* Drag & Drop Zone - Consistent with InvoiceList */}
+            <div
+                className={`hidden md:block relative group cursor-pointer rounded-[2rem] border-4 border-dashed transition-all duration-500 p-8 lg:p-12 text-center
+          ${isDragging
+                        ? 'border-gold-500 bg-gold-50/50 scale-[1.01] shadow-2xl shadow-gold-100'
+                        : 'border-gray-200 hover:border-gold-400 hover:bg-white bg-white/60'
+                    }
+        `}
+                onDragOver={handleDragOver}
+                onDragLeave={handleDragLeave}
+                onDrop={handleDrop}
+                onClick={() => document.getElementById('settlement-file').click()}
+            >
+                <input
+                    id="settlement-file"
+                    type="file"
+                    className="hidden"
+                    onChange={(e) => {
+                        handleFileChange(e);
+                        // Auto submit on selection
+                        if (e.target.files[0]) {
+                            // We need to wrap this in a synthetic event or modify handleSubmit
+                            // Let's just call the logic directly
+                            const syntheticEvent = { preventDefault: () => { } };
+                            // We need to set file state first, but state updates are async.
+                            // Better to pass the file directly to a new submit handler or modify existing one.
+                            // For now, let's just trigger the existing flow but we need to be careful about state.
+                            // Actually, let's create a direct upload function to avoid state race conditions.
+                            handleDirectUpload(e.target.files[0]);
+                        }
+                    }}
+                    accept=".csv,.xls,.xlsx,.pdf,.jpg,.png"
+                />
+
+                <div className="flex flex-col items-center gap-4 lg:gap-6 pointer-events-none">
+                    <div className={`w-16 h-16 lg:w-20 lg:h-20 rounded-2xl flex items-center justify-center transition-all duration-500 ${isDragging ? 'bg-gold-500 text-white rotate-12' : 'bg-white shadow-xl text-gold-500 group-hover:scale-110'}`}>
+                        {isAnalyzing ? (
+                            <Loader2 size={32} className="animate-spin" />
+                        ) : (
+                            <Upload size={32} />
+                        )}
                     </div>
-                    <button
-                        type="submit"
-                        disabled={!file || isAnalyzing}
-                        className={`w-full lg:w-auto px-8 py-4 rounded-2xl font-bold text-lg flex items-center justify-center gap-3 transition-all duration-300 ${!file || isAnalyzing
-                            ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
-                            : 'bg-gold-gradient text-white shadow-xl shadow-gold-500/30 hover:shadow-gold-500/40 transform hover:-translate-y-1'
-                            }`}
-                    >
-                        {isAnalyzing ? <Loader2 size={24} className="animate-spin" /> : <Upload size={24} />}
-                        {isAnalyzing ? 'Analiza...' : 'Wgraj Plik'}
-                    </button>
-                </form>
+
+                    <div className="space-y-2">
+                        <h3 className="text-xl lg:text-2xl font-serif font-bold text-gray-800 group-hover:text-gold-700 transition-colors">
+                            {isAnalyzing ? 'Analiza...' : 'Wgraj Wyciąg Bankowy'}
+                        </h3>
+                        <p className="text-gray-400 text-sm lg:text-base font-medium">
+                            {isAnalyzing ? 'Przetwarzanie...' : 'Kliknij lub upuść plik tutaj (CSV, Excel, PDF)'}
+                        </p>
+                    </div>
+                </div>
             </div>
 
             <div className="bg-white rounded-3xl overflow-hidden shadow-xl border border-amber-200/50">

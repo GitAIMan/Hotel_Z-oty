@@ -92,3 +92,8 @@
     - 🔧 **Migration Script**: Stworzono `server/scripts/migrate_data.js` do jednorazowej migracji danych z SQLite do Postgres z pełną weryfikacją.
     - 📝 **Documentation**: Dodano `RAILWAY_SETUP.md` z instrukcjami konfiguracji i `server/scripts/README.md` dla skryptu migracji.
     - ✅ **Data Persistence**: Dane są teraz trwale przechowywane w zarządzanej bazie Railway (nie giną przy redeploy).
+- **v1.9.1** (28.11.2024 - Duplicate Invoice Protection):
+    - 🛡️ **Duplicate Check**: Backend sprawdza czy faktura o danym numerze już istnieje przed zapisem (dla danego entity).
+    - ⚠️ **User Alert**: W przypadku duplikatu system zwraca błąd 409 Conflict z szczegółami istniejącej faktury.
+    - 📋 **Detailed Info**: Frontend pokazuje alert z informacjami: numer, kontrahent, kwota, status, data dodania.
+    - 🚫 **Prevention**: Niemożliwe przypadkowe dodanie tej samej faktury dwa razy.
