@@ -158,27 +158,37 @@ async function analyzeSettlementWithClaude(filesInput) {
 
     const content = [];
 
-    // Add images/documents
+    // Add images/documents/text
     for (const file of files) {
         const filePath = file.path;
-        const fileBuffer = fs.readFileSync(filePath);
-        const fileBase64 = fileBuffer.toString('base64');
-        const mediaType = getFileMediaType(filePath);
+        const ext = path.extname(filePath).toLowerCase();
 
-        content.push({
-            type: mediaType === 'application/pdf' ? 'document' : 'image',
-            source: {
-                type: "base64",
-                media_type: mediaType,
-                data: fileBase64
-            }
-        });
+        if (ext === '.csv' || ext === '.txt') {
+            const fileContent = fs.readFileSync(filePath, 'utf-8');
+            content.push({
+                type: "text",
+                text: `[FILE CONTENT START (${file.originalname})]\n${fileContent}\n[FILE CONTENT END]`
+            });
+        } else {
+            const fileBuffer = fs.readFileSync(filePath);
+            const fileBase64 = fileBuffer.toString('base64');
+            const mediaType = getFileMediaType(filePath);
+
+            content.push({
+                type: mediaType === 'application/pdf' ? 'document' : 'image',
+                source: {
+                    type: "base64",
+                    media_type: mediaType,
+                    data: fileBase64
+                }
+            });
+        }
     }
 
     // Add text prompt
     content.push({
         type: "text",
-        text: `Extract all payments/transactions from this document (which may consist of multiple images/pages). 
+        text: `Extract all payments/transactions from this document (which may consist of multiple images, pages, or text/CSV data). 
                 Return a JSON object with a key "payments" containing an array of transactions.
                 Each transaction must have:
                 - date (YYYY-MM-DD)
@@ -190,7 +200,7 @@ async function analyzeSettlementWithClaude(filesInput) {
                 Return ONLY the JSON object.`
     });
 
-    const systemPrompt = "You are an expert accountant AI. Analyze this bank statement (image or PDF) and extract all transaction rows. Return strict JSON.";
+    const systemPrompt = "You are an expert accountant AI. Analyze this bank statement (image, PDF, or CSV) and extract all transaction rows. Return strict JSON.";
 
     const userMessage = {
         role: "user",
@@ -500,7 +510,7 @@ app.post('/api/settlements/analyze', upload.array('files'), async (req, res) => 
         const aiResult = await analyzeSettlementWithClaude(files);
 
         res.json({
-            aiData: aiResult,
+            analysis: aiResult, // FIXED: Renamed from aiData to analysis
             tempFilePath: files.map(f => f.filename).join('|'),
             originalName: files[0].originalname
         });
