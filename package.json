@@ -2,8 +2,9 @@
     "name": "zloty-gron-root",
     "private": true,
     "scripts": {
-        "start": "cd server && npm install && npm start",
-        "build": "echo 'No build needed for root'"
+        "postinstall": "cd client && npm install && cd ../server && npm install",
+        "build": "cd client && npm run build",
+        "start": "cd server && npm start"
     },
     "engines": {
         "node": "18.x"
