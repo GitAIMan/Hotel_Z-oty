@@ -151,7 +151,24 @@ function InvoiceList({ entity }) {
 
         } catch (error) {
             console.error('Error saving invoice:', error);
-            alert('Błąd podczas zapisywania faktury.');
+
+            // Handle duplicate invoice error
+            if (error.response?.status === 409 && error.response?.data?.error === 'DUPLICATE_INVOICE') {
+                const existing = error.response.data.existingInvoice;
+                const createdDate = new Date(existing.createdAt).toLocaleDateString('pl-PL');
+                alert(
+                    `⚠️ FAKTURA JUŻ ISTNIEJE W BAZIE!\n\n` +
+                    `Numer: ${existing.invoiceNumber}\n` +
+                    `Kontrahent: ${existing.contractorName}\n` +
+                    `Kwota: ${existing.grossAmount} PLN\n` +
+                    `Data wystawienia: ${existing.issueDate || '-'}\n` +
+                    `Status: ${existing.status === 'paid' ? 'Opłacona' : existing.status === 'partial' ? 'Częściowo opłacona' : 'Nieopłacona'}\n` +
+                    `Dodana do systemu: ${createdDate}\n\n` +
+                    `Nie można dodać tej samej faktury ponownie.`
+                );
+            } else {
+                alert('Błąd podczas zapisywania faktury.');
+            }
         } finally {
             setIsSaving(false);
         }

@@ -339,6 +339,31 @@ app.post('/api/invoices/confirm', async (req, res) => {
     try {
         const { entity, invoiceData, tempFilePath } = req.body;
 
+        // 🛡️ DUPLICATE CHECK: Prevent adding the same invoice twice
+        const existingInvoice = await Invoice.findOne({
+            where: {
+                entity: entity || 'zloty_gron',
+                invoiceNumber: invoiceData.invoiceNumber
+            }
+        });
+
+        if (existingInvoice) {
+            console.log(`⚠️ Duplicate invoice detected: ${invoiceData.invoiceNumber}`);
+            return res.status(409).json({
+                error: 'DUPLICATE_INVOICE',
+                message: `Faktura ${invoiceData.invoiceNumber} już istnieje w bazie`,
+                existingInvoice: {
+                    id: existingInvoice.id,
+                    invoiceNumber: existingInvoice.invoiceNumber,
+                    issueDate: existingInvoice.issueDate,
+                    contractorName: existingInvoice.contractorName,
+                    grossAmount: existingInvoice.grossAmount,
+                    status: existingInvoice.status,
+                    createdAt: existingInvoice.createdAt
+                }
+            });
+        }
+
         // Create Record
         const newInvoice = await Invoice.create({
             entity: entity || 'zloty_gron',

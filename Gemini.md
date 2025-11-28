@@ -1,27 +1,3 @@
-- [x] **Baza Danych**: 
-    - SQLite z pełną strukturą (NIP, daty, kwoty netto/vat/brutto).
-    - Obsługa **Multi-Entity** (kolumna `entity` w każdej tabeli).
-- [x] **Backend & AI**: 
-    - Integracja z **Claude 4.5 Sonnet** (model `claude-sonnet-4-5-20250929`).
-    - **Direct PDF Analysis**: Rezygnacja z lokalnego `pdf-parse`. Wysyłanie całego pliku PDF bezpośrednio do API Claude, co pozwala na lepsze zrozumienie struktury dokumentu (tabele, nagłówki).
-    - Inteligentny fallback do wersji 3.5 w przypadku braku dostępu.
-    - Ekstrakcja danych z PDF do ustrukturyzowanego JSON.
-
-
-### Do Zrobienia (Zgodnie z Założenie.txt):
-1.  **Logika Biznesowa**:
-    - [x] **Parowanie (Matching)** płatności z fakturami - Zaimplementowane! System automatycznie paruje płatności z rozliczeń z fakturami na podstawie kwoty i kontrahenta/numeru faktury.
-    - [ ] Obsługa "Paczek przelewów" (rozbijanie jednej płatności na wiele faktur).
-    - [x] **Edycja danych faktury** przez użytkownika - Dodano modal edycji z pełną funkcjonalnością.
-    - [x] **Usuwanie faktur** - Dodano endpoint DELETE z usuwaniem plików i wpisem do historii.
-2.  **Baza Danych**:
-    - [ ] Migracja na PostgreSQL (zalecana dla produkcji, obecnie SQLite dla dev).
-3.  **Rozwój AI**:
-    - [x] Dodanie obsługi obrazów (JPG/PNG) przez OCR - Claude 4.5 obsługuje bezpośrednio obrazy!
-    - [ ] Uczenie modelu na podstawie korekt użytkownika (feedback loop).
-
-## Uwagi Techniczne:
-- **Model AI**: System domyślnie pyta o `claude-4-5-sonnet-20250929`.
 - **UI**: Zastosowano podejście "Mobile First", ale zoptymalizowane pod duże ekrany ("Ultra Wide").
 - **Bezpieczeństwo**: Klucze API przechowywane w `.env`.
 
@@ -108,3 +84,11 @@
     - 📄 **Settlement Route**: Dodano brakujący endpoint `POST /api/settlements/analyze`.
     - ✅ **Response Structure**: Naprawiono niezgodność Frontend/Backend - zmieniono `aiData` na `analysis` w odpowiedzi settlements.
     - 📊 **CSV Support**: Dodano pełną obsługę plików CSV/TXT w rozliczeniach - pliki są czytane jako tekst i wysyłane do Claude jako text blocks.
+- **v1.9** (28.11.2024 - PostgreSQL Migration):
+    - 🐘 **PostgreSQL Migration**: Pełna migracja z SQLite na Railway Managed PostgreSQL.
+    - 🔄 **Dual-Mode Support**: Backend automatycznie wykrywa środowisko - Postgres (produkcja z DATABASE_URL) lub SQLite (local dev).
+    - 🔒 **SSL Configuration**: Dodano SSL support dla Railway Postgres z self-signed certificates.
+    - 📦 **Dependencies**: Dodano `pg` (^8.11.3) i `pg-hstore` (^2.3.4) dla PostgreSQL driver.
+    - 🔧 **Migration Script**: Stworzono `server/scripts/migrate_data.js` do jednorazowej migracji danych z SQLite do Postgres z pełną weryfikacją.
+    - 📝 **Documentation**: Dodano `RAILWAY_SETUP.md` z instrukcjami konfiguracji i `server/scripts/README.md` dla skryptu migracji.
+    - ✅ **Data Persistence**: Dane są teraz trwale przechowywane w zarządzanej bazie Railway (nie giną przy redeploy).
