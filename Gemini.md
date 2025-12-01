@@ -115,3 +115,8 @@
 - **v1.9.2** (28.11.2024 - UI Polish):
     - 🎨 **UI Resizing**: Zmniejszono obszar "Dodaj fakturę" (mniejszy padding, ikony i tekst) dla lepszej czytelności na PC i mobile.
     - 🔄 **Settlements UI**: Ujednolicono wygląd "Wgraj Wyciąg" w Rozliczeniach - teraz wygląda tak samo jak w Fakturach (Drag & Drop), zachowując spójny styl.
+- **v1.9.3** (01.12.2024 - CSV Import & History):
+    - 🚀 **Fast CSV Import**: Nowy przycisk "Import CSV" w Rozliczeniach. Pliki CSV są przetwarzane lokalnie (bez AI) dla maksymalnej szybkości i niezawodności.
+    - 📊 **Transaction History**: Nowy moduł "Transakcje" (Tabela) wyświetlający pełną historię wpływów i wydatków z możliwością filtrowania.
+    - 🛡️ **Duplicate Protection**: Wzmocniona ochrona przed duplikatami faktur z czytelnym komunikatem błędu.
+    - 🔧 **Fixes**: Naprawa błędu "HistoryList is not defined" i przywrócenie poprawnego układu aplikacji.
