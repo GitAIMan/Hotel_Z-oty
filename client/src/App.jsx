@@ -93,31 +93,12 @@ function App() {
                   <TabButton id="invoices" label="Faktury" icon={FileText} />
                   <TabButton id="settlements" label="Rozliczenia" icon={DollarSign} />
                   <TabButton id="history" label="Transakcje" icon={TableProperties} />
-                  <TabButton id="logs" label="Logi Systemu" icon={Clock} />
-                </div>
-                <div className="p-8 mt-4 border-t border-gray-100">
-                  <div className="bg-gradient-to-br from-gray-900 to-gray-800 rounded-xl p-6 text-white shadow-lg">
-                    <p className="text-xs text-gray-400 mb-2">Status AI</p>
-                    <div className="flex items-center gap-3">
-                      <div className="w-3 h-3 bg-green-400 rounded-full animate-pulse"></div>
-                      <span className="font-medium text-base">Claude 4.5 Sonnet</span>
-                    </div>
-                    <p className="text-xs text-gray-500 mt-3">Ready for Analysis</p>
-                  </div>
+                  {activeTab === 'invoices' && <InvoiceList entity={entity} />}
+                  {activeTab === 'settlements' && <SettlementList entity={entity} />}
+                  {activeTab === 'history' && <TransactionHistory entity={entity} />}
                 </div>
               </div>
             </div>
-
-            {/* Content Area */}
-            <div className="lg:col-span-10">
-              <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
-                {activeTab === 'invoices' && <InvoiceList entity={entity} />}
-                {activeTab === 'settlements' && <SettlementList entity={entity} />}
-                {activeTab === 'history' && <TransactionHistory entity={entity} />}
-                {activeTab === 'logs' && <HistoryList entity={entity} />}
-              </div>
-            </div>
-          </div>
 
         </main>
 
