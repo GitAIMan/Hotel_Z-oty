@@ -74,6 +74,10 @@
     - 🏷️ **Auto-Categorization**: Automatyczne przypisywanie kategorii (np. Biedronka -> Towary, Orlen -> Paliwo) na podstawie słów kluczowych.
     - 🇵🇱 **Encoding Fix**: Poprawna obsługa polskich znaków (Windows-1250) dzięki `iconv-lite`.
     - 🧹 **UI Cleanup**: Usunięcie zakładki "Logi Systemu".
+- **v1.9.4** (01.12.2024 - Data Hygiene & Logic Refinement):
+    - 🧼 **Contractor Cleaning**: Agresywne czyszczenie nazw kontrahentów ("Glovoapp.com/pl Operacja:..." -> "Glovoapp.com/pl"). Usuwanie zbędnych sufiksów (Tytuł, Adres, Data).
+    - 🗺️ **Expanded Categories**: Dodano dziesiątki nowych słów kluczowych (Stokrotka, Mol, Amic, Canva, Zoom, Slack, KFC, Starbucks, Media, Telekomy).
+    - 🧠 **Matching Logic**: Wyjaśniono logikę parowania (Kwota +/- 0.20 PLN AND (Nr Faktury OR Nazwa Kontrahenta)).
 
 ### Do Zrobienia (Zgodnie z Założenie.txt):
 1.  **Logika Biznesowa**:
