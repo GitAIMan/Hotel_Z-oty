@@ -162,7 +162,6 @@ async function analyzeSettlementWithClaude(filesInput) {
     if (csvFile) {
         console.log(`Processing CSV file locally: ${csvFile.originalname}`);
         try {
-
             // Read as buffer and decode with windows-1250 (common for Polish banks)
             const fileBuffer = fs.readFileSync(csvFile.path);
             const fileContent = iconv.decode(fileBuffer, 'windows-1250');
@@ -172,15 +171,17 @@ async function analyzeSettlementWithClaude(filesInput) {
 
             // --- CATEGORY MAPPING ---
             const CATEGORY_MAP = [
-                { keywords: ['biedronka', 'lidl', 'kaufland', 'auchan', 'dino', 'netto', 'carrefour', 'żabka', 'zabka', 'lewiatan'], category: 'GASTRONOMIA KOSZTY - TOWARY' },
-                { keywords: ['orlen', 'bp', 'shell', 'circle k', 'moya', 'lotos', 'paliwo', 'stacja'], category: 'KOSZTY OGÓLNE - ZWROT GOTÓWKI ZA PALIWO' },
-                { keywords: ['netflix', 'spotify', 'adobe', 'google', 'microsoft', 'apple', 'suno', 'midjourney', 'chatgpt', 'openai'], category: 'KOSZTY OGÓLNE - OPROGRAMOWANIE' },
-                { keywords: ['koleo', 'uber', 'bolt', 'freenow', 'jakdojade', 'bilet', 'pkp'], category: 'KOSZTY OGÓLNE - USŁUGI TRANSPORTOWE' },
-                { keywords: ['glovo', 'pyszne', 'wolt', 'ubereats', 'restauracja', 'bar', 'kawiarnia', 'cukiernia'], category: 'GASTRONOMIA KOSZTY - KOSZTY INNYCH USŁUG ZEWNĘTRZNYCH' },
-                { keywords: ['castorama', 'leroy', 'obi', 'mrowka', 'psb', 'budowlany'], category: 'HOTEL KOSZTY - REMONTY NAPRAWY' },
-                { keywords: ['apteka', 'doz', 'gemini'], category: 'KOSZTY OGÓLNE - KOSZTY ADMINISTRACYJNE' }, // Fallback
-                { keywords: ['action', 'pepco', 'tedi', 'kik'], category: 'HOTEL KOSZTY - UZUPEŁNIENIE WYPOSAŻENIA' },
-                { keywords: ['prowizja', 'opłata', 'odsetki'], category: 'KOSZTY OGÓLNE - USŁUGI FINANSOWE / BANKOWE' }
+                { keywords: ['biedronka', 'lidl', 'kaufland', 'auchan', 'dino', 'netto', 'carrefour', 'żabka', 'zabka', 'lewiatan', 'stokrotka', 'delikatesy'], category: 'GASTRONOMIA KOSZTY - TOWARY' },
+                { keywords: ['orlen', 'bp', 'shell', 'circle k', 'moya', 'lotos', 'paliwo', 'stacja', 'mol', 'amic'], category: 'KOSZTY OGÓLNE - ZWROT GOTÓWKI ZA PALIWO' },
+                { keywords: ['netflix', 'spotify', 'adobe', 'google', 'microsoft', 'apple', 'suno', 'midjourney', 'chatgpt', 'openai', 'canva', 'zoom', 'slack'], category: 'KOSZTY OGÓLNE - OPROGRAMOWANIE' },
+                { keywords: ['koleo', 'uber', 'bolt', 'freenow', 'jakdojade', 'bilet', 'pkp', 'intercity', 'mpk', 'ztm'], category: 'KOSZTY OGÓLNE - USŁUGI TRANSPORTOWE' },
+                { keywords: ['glovo', 'pyszne', 'wolt', 'ubereats', 'restauracja', 'bar', 'kawiarnia', 'cukiernia', 'mcdonald', 'kfc', 'burger king', 'starbucks', 'costa'], category: 'GASTRONOMIA KOSZTY - KOSZTY INNYCH USŁUG ZEWNĘTRZNYCH' },
+                { keywords: ['castorama', 'leroy', 'obi', 'mrowka', 'psb', 'budowlany', 'bricomarche', 'jula'], category: 'HOTEL KOSZTY - REMONTY NAPRAWY' },
+                { keywords: ['apteka', 'doz', 'gemini', 'super-pharm', 'rossmann', 'hebe'], category: 'KOSZTY OGÓLNE - KOSZTY ADMINISTRACYJNE' },
+                { keywords: ['action', 'pepco', 'tedi', 'kik', 'sinsay', 'hm', 'zara', 'reserved'], category: 'HOTEL KOSZTY - UZUPEŁNIENIE WYPOSAŻENIA' },
+                { keywords: ['prowizja', 'opłata', 'odsetki', 'bank', 'ing', 'mbank', 'pko', 'santander'], category: 'KOSZTY OGÓLNE - USŁUGI FINANSOWE / BANKOWE' },
+                { keywords: ['orange', 't-mobile', 'plus', 'play', 'upc', 'vectra', 'netia'], category: 'KOSZTY OGÓLNE - TELEFONY / KARTY SIM' },
+                { keywords: ['tauron', 'pgnig', 'enea', 'energa', 'innogy', 'woda', 'ścieki', 'gaz'], category: 'KOSZTY OGÓLNE - MEDIA' }
             ];
 
             function guessCategory(text) {
@@ -192,6 +193,31 @@ async function analyzeSettlementWithClaude(filesInput) {
                     }
                 }
                 return 'KOSZTY OGÓLNE - INNE USŁUGI ZWIĄZANE Z ZARZĄDZANIEM'; // Default
+            }
+
+            function cleanContractor(text) {
+                if (!text) return '';
+                let cleaned = text;
+                // Remove common prefixes/suffixes found in this bank's CSV
+                cleaned = cleaned.replace(/Operacja:.*$/i, '');
+                cleaned = cleaned.replace(/Numer referencyjny:.*$/i, '');
+                cleaned = cleaned.replace(/Tytuł:.*$/i, '');
+                cleaned = cleaned.replace(/Lokalizacja:.*$/i, '');
+                cleaned = cleaned.replace(/Adres:.*$/i, '');
+                cleaned = cleaned.replace(/Data wykonania:.*$/i, '');
+                cleaned = cleaned.replace(/Oryginalna kwota:.*$/i, '');
+
+                // Remove specific noise
+                cleaned = cleaned.replace(/Nazwa odbiorcy:/i, '');
+                cleaned = cleaned.replace(/Nazwa nadawcy:/i, '');
+
+                // Trim whitespace and special chars
+                cleaned = cleaned.replace(/['"]/g, '').trim();
+
+                // If result is empty or just special chars, return original (fallback) or empty
+                if (cleaned.length < 2) return text.substring(0, 50);
+
+                return cleaned;
             }
 
             // --- PARSING LOGIC ---
@@ -267,7 +293,7 @@ async function analyzeSettlementWithClaude(filesInput) {
                 }
 
                 // Clean up contractor
-                contractor = contractor.trim().replace(/['"]/g, '');
+                contractor = cleanContractor(contractor);
 
                 // 4. CATEGORY
                 const category = guessCategory(contractor + ' ' + cols[6]);
