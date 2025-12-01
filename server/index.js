@@ -170,46 +170,116 @@ async function analyzeSettlementWithClaude(filesInput) {
 
             const payments = [];
 
-            // Simple heuristic to find header row and data
-            // We assume standard columns might exist, or we just take all rows if no header found
-            // For now, let's assume a generic format or try to guess. 
-            // Since we don't know the exact bank format, we'll try to find lines with dates and amounts.
+            // --- CATEGORY MAPPING ---
+            const CATEGORY_MAP = [
+                { keywords: ['biedronka', 'lidl', 'kaufland', 'auchan', 'dino', 'netto', 'carrefour', 'żabka', 'zabka', 'lewiatan'], category: 'GASTRONOMIA KOSZTY - TOWARY' },
+                { keywords: ['orlen', 'bp', 'shell', 'circle k', 'moya', 'lotos', 'paliwo', 'stacja'], category: 'KOSZTY OGÓLNE - ZWROT GOTÓWKI ZA PALIWO' },
+                { keywords: ['netflix', 'spotify', 'adobe', 'google', 'microsoft', 'apple', 'suno', 'midjourney', 'chatgpt', 'openai'], category: 'KOSZTY OGÓLNE - OPROGRAMOWANIE' },
+                { keywords: ['koleo', 'uber', 'bolt', 'freenow', 'jakdojade', 'bilet', 'pkp'], category: 'KOSZTY OGÓLNE - USŁUGI TRANSPORTOWE' },
+                { keywords: ['glovo', 'pyszne', 'wolt', 'ubereats', 'restauracja', 'bar', 'kawiarnia', 'cukiernia'], category: 'GASTRONOMIA KOSZTY - KOSZTY INNYCH USŁUG ZEWNĘTRZNYCH' },
+                { keywords: ['castorama', 'leroy', 'obi', 'mrowka', 'psb', 'budowlany'], category: 'HOTEL KOSZTY - REMONTY NAPRAWY' },
+                { keywords: ['apteka', 'doz', 'gemini'], category: 'KOSZTY OGÓLNE - KOSZTY ADMINISTRACYJNE' }, // Fallback
+                { keywords: ['action', 'pepco', 'tedi', 'kik'], category: 'HOTEL KOSZTY - UZUPEŁNIENIE WYPOSAŻENIA' },
+                { keywords: ['prowizja', 'opłata', 'odsetki'], category: 'KOSZTY OGÓLNE - USŁUGI FINANSOWE / BANKOWE' }
+            ];
+
+            function guessCategory(text) {
+                if (!text) return null;
+                const lowerText = text.toLowerCase();
+                for (const map of CATEGORY_MAP) {
+                    if (map.keywords.some(k => lowerText.includes(k))) {
+                        return map.category;
+                    }
+                }
+                return 'KOSZTY OGÓLNE - INNE USŁUGI ZWIĄZANE Z ZARZĄDZANIEM'; // Default
+            }
+
+            // --- PARSING LOGIC ---
+            // We need to handle quoted fields properly: "val1","val2","val 3"
+            const parseCSVLine = (text) => {
+                const result = [];
+                let cell = '';
+                let inQuotes = false;
+                for (let i = 0; i < text.length; i++) {
+                    const char = text[i];
+                    if (char === '"') {
+                        inQuotes = !inQuotes;
+                    } else if (char === ',' && !inQuotes) {
+                        result.push(cell);
+                        cell = '';
+                    } else {
+                        cell += char;
+                    }
+                }
+                result.push(cell);
+                return result.map(c => c.trim().replace(/^"|"$/g, '')); // Remove surrounding quotes
+            };
 
             for (const line of lines) {
-                // Skip potential headers that don't look like data (no numbers)
-                if (!/\d/.test(line)) continue;
+                // Skip empty or header-like lines if they don't start with a date
+                if (!/^\s*"?\d{4}-\d{2}-\d{2}/.test(line)) continue;
 
-                const parts = line.split(/[;,]/).map(p => p.trim().replace(/"/g, ''));
+                const cols = parseCSVLine(line);
 
-                // We need at least a date and an amount
-                // Regex for date YYYY-MM-DD or DD.MM.YYYY
-                const dateMatch = line.match(/(\d{4}-\d{2}-\d{2})|(\d{2}\.\d{2}\.\d{4})/);
-                // Regex for amount (number with optional decimal)
-                const amountMatch = line.match(/-?\d+[.,]\d{2}/);
+                // MAPPING BASED ON USER'S CSV STRUCTURE:
+                // 0: Data operacji
+                // 3: Kwota
+                // 6: Opis transakcji (General title)
+                // 7: Rachunek odbiorcy / Tytuł (varies)
+                // 8: Nazwa odbiorcy / Numer telefonu / Lokalizacja (varies)
+                // 9: Tytuł / Operacja (varies)
 
-                if (dateMatch && amountMatch) {
-                    let date = dateMatch[0];
-                    // Normalize date to YYYY-MM-DD
-                    if (date.includes('.')) {
-                        const [d, m, y] = date.split('.');
-                        date = `${y}-${m}-${d}`;
+                // 1. DATE
+                const date = cols[0];
+
+                // 2. AMOUNT
+                let amountStr = cols[3].replace(/\s/g, '').replace(',', '.');
+                let amount = parseFloat(amountStr);
+                if (isNaN(amount)) continue;
+
+                // 3. CONTRACTOR & DESCRIPTION EXTRACTION
+                // Join all relevant columns to search for keywords
+                const fullRowText = cols.join(' ');
+                let contractor = '';
+
+                // Strategy: Look for specific prefixes in the raw line or columns
+                // "Nazwa odbiorcy: [VALUE]"
+                // "Nazwa nadawcy: [VALUE]"
+                // "Lokalizacja: Adres: [VALUE]"
+
+                const nazwaOdbiorcyMatch = fullRowText.match(/Nazwa odbiorcy:\s*([^"]+?)(?=(,|$|"))/);
+                const nazwaNadawcyMatch = fullRowText.match(/Nazwa nadawcy:\s*([^"]+?)(?=(,|$|"))/);
+                const lokalizacjaMatch = fullRowText.match(/Lokalizacja: Adres:\s*([^"]+?)(?=(,|$|"|Miasto:))/);
+                const netflixMatch = fullRowText.match(/NETFLIX\.COM/i);
+
+                if (nazwaOdbiorcyMatch) contractor = nazwaOdbiorcyMatch[1];
+                else if (nazwaNadawcyMatch) contractor = nazwaNadawcyMatch[1];
+                else if (lokalizacjaMatch) contractor = lokalizacjaMatch[1];
+                else if (netflixMatch) contractor = "NETFLIX";
+                else {
+                    // Fallback: Try to use the "Tytuł" if it looks like a name, or just generic
+                    // In this CSV, col 8 often has "Lokalizacja: ..."
+                    if (cols[8] && cols[8].includes('Lokalizacja:')) {
+                        contractor = cols[8].replace('Lokalizacja: Adres:', '').split('Miasto:')[0].trim();
+                    } else {
+                        contractor = cols[6] || 'Nieznany';
                     }
-
-                    let amountStr = amountMatch[0].replace(',', '.');
-                    let amount = parseFloat(amountStr);
-
-                    // Try to find contractor/description in other parts
-                    // Join parts that are NOT date or amount
-                    const description = parts.filter(p => !p.includes(dateMatch[0]) && !p.includes(amountMatch[0])).join(' ');
-
-                    payments.push({
-                        date: date,
-                        amount: Math.abs(amount), // Store absolute value
-                        type: amount < 0 ? 'outgoing' : 'incoming',
-                        contractor: description.substring(0, 50), // Guess contractor from start of desc
-                        description: description
-                    });
                 }
+
+                // Clean up contractor
+                contractor = contractor.trim().replace(/['"]/g, '');
+
+                // 4. CATEGORY
+                const category = guessCategory(contractor + ' ' + cols[6]);
+
+                payments.push({
+                    date: date,
+                    amount: Math.abs(amount),
+                    type: amount < 0 ? 'outgoing' : 'incoming',
+                    contractor: contractor,
+                    description: cols[6] + ' ' + (cols[9] || ''),
+                    category: category
+                });
             }
 
             console.log(`CSV Local Parse: Found ${payments.length} transactions.`);

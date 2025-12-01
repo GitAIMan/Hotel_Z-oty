@@ -1,13 +1,14 @@
-# 💎 Złoty Groń - System Rozliczeń AI (v1.9.2)
+# 💎 Złoty Groń - System Rozliczeń AI (v1.9.3)
 
 **Status**: Produkcja (Railway) 🟢
 **Baza**: PostgreSQL (Managed) 🐘
 **AI**: Claude 4.5 Sonnet 🧠
 
-## 📅 Osiągnięcia Sesji (28.11.2024):
-1. **Migracja Bazy**: Przejście z SQLite na PostgreSQL (Railway) - dane są bezpieczne i trwałe.
-2. **Ochrona Danych**: Blokada duplikatów faktur (Backend + Frontend Alert).
-3. **UX/UI**: Nowy, lżejszy interfejs uploadu (Drag & Drop) spójny dla Faktur i Rozliczeń.
+## 📅 Osiągnięcia Sesji (01.12.2024):
+1. **Advanced CSV Parsing**: Wdrożenie zaawansowanego parsera wyciągów bankowych (obsługa specyficznych formatów, regex).
+2. **Auto-Categorization**: Automatyczne przypisywanie kategorii kosztowych na podstawie słów kluczowych (np. Orlen -> Paliwo).
+3. **UI Cleanup**: Usunięcie zbędnej zakładki "Logi Systemu".
+4. **Encoding Fix**: Obsługa polskich znaków w plikach CSV (Windows-1250).
 
 ---
 
@@ -22,54 +23,6 @@
 - **v1.2**: Wdrożenie prawdziwego Claude 3.5, obsługa Multi-Entity.
 - **v1.3**: Aktualizacja do **Claude 4.5 Sonnet**, nowy layout "Ultra Wide Luxury", powiększenie interfejsu.
 - **v1.4** (25.11.2024): 
-    - ✅ Naprawiono błąd rozliczenia (`payments.reduce is not a function`)
-    - ✅ Dodano endpointy DELETE i PUT dla faktur
-    - ✅ System parowania płatności działa poprawnie
-    - ✅ Edycja i usuwanie faktur w pełni funkcjonalne
-- **v1.5** (25.11.2024 - UI & Integrity Update):
-    - 🎨 **UI Refresh "Gold & Finesse"**: Nowy, elegancki styl dla list faktur, rozliczeń i historii (gradienty, złote akcenty).
-    - 🧹 **History Cleanup**: Dodano możliwość czyszczenia całej historii zdarzeń.
-    - 🛡️ **Self-Healing Settlements**: Automatyczna naprawa spójności danych przy usuwaniu faktur (odparowywanie płatności).
-    - 🔄 **Reverse Matching**: Nowe faktury są automatycznie parowane z istniejącymi, niesparowanymi płatnościami.
-    - 🔧 **Backend Fixes**: Naprawa endpointów, wymuszenie portu 5173, stabilizacja serwera.
-- **v1.6** (26.11.2024 - Deployment & Cloud):
-    - 🚀 **GitHub Integration**: Pełna synchronizacja kodu z repozytorium `GitAIMan/Hotel_Z-oty`.
-    - ☁️ **Railway Deployment**: Aplikacja wdrożona na produkcję (Frontend + Backend).
-    - 🔧 **Config Fixes**: Dynamiczne porty (`process.env.PORT`), zmienne środowiskowe dla API (`VITE_API_URL`), naprawa CORS.
-    - 🛡️ **Security**: Klucze API przeniesione do bezpiecznych zmiennych środowiskowych Railway.
-- [x] **Baza Danych**:
-    - SQLite z pełną strukturą (NIP, daty, kwoty netto/vat/brutto).
-    - Obsługa **Multi-Entity** (kolumna `entity` w każdej tabeli).
-- [x] **Backend & AI**:
-    - Integracja z **Claude 4.5 Sonnet** (model `claude-sonnet-4-5-20250929`).
-    - **Direct PDF Analysis**: Rezygnacja z lokalnego `pdf-parse`. Wysyłanie całego pliku PDF bezpośrednio do API Claude, co pozwala na lepsze zrozumienie struktury dokumentu (tabele, nagłówki).
-    - Inteligentny fallback do wersji 3.5 w przypadku braku dostępu.
-    - Ekstrakcja danych z PDF do ustrukturyzowanego JSON.
-
-
-### Do Zrobienia (Zgodnie z Założenie.txt):
-1.  **Logika Biznesowa**:
-    - [x] **Parowanie (Matching)** płatności z fakturami - Zaimplementowane! System automatycznie paruje płatności z rozliczeń z fakturami na podstawie kwoty i kontrahenta/numeru faktury.
-    - [ ] Obsługa "Paczek przelewów" (rozbijanie jednej płatności na wiele faktur).
-    - [x] **Edycja danych faktury** przez użytkownika - Dodano modal edycji z pełną funkcjonalnością.
-    - [x] **Usuwanie faktur** - Dodano endpoint DELETE z usuwaniem plików i wpisem do historii.
-2.  **Baza Danych**:
-    - [ ] Migracja na PostgreSQL (zalecana dla produkcji, obecnie SQLite dla dev).
-3.  **Rozwój AI**:
-    - [x] Dodanie obsługi obrazów (JPG/PNG) przez OCR - Claude 4.5 obsługuje bezpośrednio obrazy!
-    - [ ] Uczenie modelu na podstawie korekt użytkownika (feedback loop).
-
-## Uwagi Techniczne:
-- **Model AI**: System domyślnie pyta o `claude-4-5-sonnet-20250929`.
-- **UI**: Zastosowano podejście "Mobile First", ale zoptymalizowane pod duże ekrany ("Ultra Wide").
-- **Bezpieczeństwo**: Klucze API przechowywane w `.env`.
-
-## Historia Zmian:
-- **v1.0**: Inicjalizacja projektu, podstawowy CRUD.
-- **v1.1**: Dodanie AI (mock), podstawowy styl.
-- **v1.2**: Wdrożenie prawdziwego Claude 3.5, obsługa Multi-Entity.
-- **v1.3**: Aktualizacja do **Claude 4.5 Sonnet**, nowy layout "Ultra Wide Luxury", powiększenie interfejsu.
-- **v1.4** (25.11.2024):
     - ✅ Naprawiono błąd rozliczenia (`payments.reduce is not a function`)
     - ✅ Dodano endpointy DELETE i PUT dla faktur
     - ✅ System parowania płatności działa poprawnie
@@ -115,3 +68,21 @@
 - **v1.9.2** (28.11.2024 - UI Polish):
     - 🎨 **UI Resizing**: Zmniejszono obszar "Dodaj fakturę" (mniejszy padding, ikony i tekst) dla lepszej czytelności na PC i mobile.
     - 🔄 **Settlements UI**: Ujednolicono wygląd "Wgraj Wyciąg" w Rozliczeniach - teraz wygląda tak samo jak w Fakturach (Drag & Drop), zachowując spójny styl.
+- **v1.9.3** (01.12.2024 - Advanced CSV & Categorization):
+    - 🧠 **Smart Parsing**: Zaawansowane parsowanie CSV (Regex) obsługujące cudzysłowy i specyficzne formaty bankowe.
+    - 🔍 **Contractor Extraction**: Inteligentne wyciąganie nazwy kontrahenta z pól "Nazwa odbiorcy", "Nazwa nadawcy", "Lokalizacja".
+    - 🏷️ **Auto-Categorization**: Automatyczne przypisywanie kategorii (np. Biedronka -> Towary, Orlen -> Paliwo) na podstawie słów kluczowych.
+    - 🇵🇱 **Encoding Fix**: Poprawna obsługa polskich znaków (Windows-1250) dzięki `iconv-lite`.
+    - 🧹 **UI Cleanup**: Usunięcie zakładki "Logi Systemu".
+
+### Do Zrobienia (Zgodnie z Założenie.txt):
+1.  **Logika Biznesowa**:
+    - [x] **Parowanie (Matching)** płatności z fakturami - Zaimplementowane! System automatycznie paruje płatności z rozliczeń z fakturami na podstawie kwoty i kontrahenta/numeru faktury.
+    - [ ] Obsługa "Paczek przelewów" (rozbijanie jednej płatności na wiele faktur).
+    - [x] **Edycja danych faktury** przez użytkownika - Dodano modal edycji z pełną funkcjonalnością.
+    - [x] **Usuwanie faktur** - Dodano endpoint DELETE z usuwaniem plików i wpisem do historii.
+2.  **Baza Danych**:
+    - [x] Migracja na PostgreSQL (zalecana dla produkcji, obecnie SQLite dla dev).
+3.  **Rozwój AI**:
+    - [x] Dodanie obsługi obrazów (JPG/PNG) przez OCR - Claude 4.5 obsługuje bezpośrednio obrazy!
+    - [ ] Uczenie modelu na podstawie korekt użytkownika (feedback loop).
