@@ -5,6 +5,7 @@ const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
 const Anthropic = require('@anthropic-ai/sdk');
+const iconv = require('iconv-lite');
 const { initDb, Invoice, Settlement, History, sequelize } = require('./db');
 const { Op } = require('sequelize');
 
@@ -161,7 +162,10 @@ async function analyzeSettlementWithClaude(filesInput) {
     if (csvFile) {
         console.log(`Processing CSV file locally: ${csvFile.originalname}`);
         try {
-            const fileContent = fs.readFileSync(csvFile.path, 'utf-8');
+
+            // Read as buffer and decode with windows-1250 (common for Polish banks)
+            const fileBuffer = fs.readFileSync(csvFile.path);
+            const fileContent = iconv.decode(fileBuffer, 'windows-1250');
             const lines = fileContent.split(/\r?\n/).filter(line => line.trim().length > 0);
 
             const payments = [];

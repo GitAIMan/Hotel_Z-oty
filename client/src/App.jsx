@@ -93,6 +93,7 @@ function App() {
                   <TabButton id="invoices" label="Faktury" icon={FileText} />
                   <TabButton id="settlements" label="Rozliczenia" icon={DollarSign} />
                   <TabButton id="history" label="Transakcje" icon={TableProperties} />
+
                 </div>
                 <div className="p-8 mt-4 border-t border-gray-100">
                   <div className="bg-gradient-to-br from-gray-900 to-gray-800 rounded-xl p-6 text-white shadow-lg">
@@ -115,6 +116,7 @@ function App() {
                 {activeTab === 'history' && <TransactionHistory entity={entity} />}
               </div>
             </div>
+          </div>
 
         </main>
 
