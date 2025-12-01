@@ -298,12 +298,17 @@ async function analyzeSettlementWithClaude(filesInput) {
                 // 4. CATEGORY
                 const category = guessCategory(contractor + ' ' + cols[6]);
 
+                // 5. DESCRIPTION CLEANING
+                let rawDescription = cols[6] + ' ' + (cols[9] || '');
+                // Remove 'Operacja: <digits>' and surrounding quotes/spaces
+                let description = rawDescription.replace(/'?Operacja:\s*[\d\w]+'?/gi, '').trim();
+
                 payments.push({
                     date: date,
                     amount: Math.abs(amount),
                     type: amount < 0 ? 'outgoing' : 'incoming',
                     contractor: contractor,
-                    description: cols[6] + ' ' + (cols[9] || ''),
+                    description: description,
                     category: category
                 });
             }

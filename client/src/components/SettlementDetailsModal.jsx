@@ -46,7 +46,7 @@ function SettlementDetailsModal({ isOpen, onClose, settlement }) {
                                             <td className="p-4 font-medium text-gray-800">{payment.contractor}</td>
                                             <td className="p-4 text-sm text-gray-500">
                                                 <div className="group relative">
-                                                    <div className="line-clamp-2 group-hover:line-clamp-none transition-all duration-300 cursor-help" title="Najedź by rozwinąć">
+                                                    <div className="line-clamp-2 group-hover:line-clamp-none transition-all duration-300">
                                                         {payment.description}
                                                     </div>
                                                 </div>
