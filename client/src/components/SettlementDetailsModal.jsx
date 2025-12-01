@@ -44,8 +44,12 @@ function SettlementDetailsModal({ isOpen, onClose, settlement }) {
                                         <tr key={index} className="hover:bg-gray-50 transition-colors">
                                             <td className="p-4 text-gray-600">{payment.date}</td>
                                             <td className="p-4 font-medium text-gray-800">{payment.contractor}</td>
-                                            <td className="p-4 text-sm text-gray-500 max-w-xs truncate" title={payment.description}>
-                                                {payment.description}
+                                            <td className="p-4 text-sm text-gray-500">
+                                                <div className="group relative">
+                                                    <div className="line-clamp-2 group-hover:line-clamp-none transition-all duration-300 cursor-help" title="Najedź by rozwinąć">
+                                                        {payment.description}
+                                                    </div>
+                                                </div>
                                             </td>
                                             <td className="p-4 text-right font-mono font-medium">
                                                 {parseFloat(payment.amount).toFixed(2)} PLN
