@@ -5,6 +5,7 @@ import * as pdfjsLib from 'pdfjs-dist';
 import pdfWorker from 'pdfjs-dist/build/pdf.worker.min.mjs?url';
 import InvoiceVerificationModal from './InvoiceVerificationModal';
 import InvoiceEditModal from './InvoiceEditModal';
+import DuplicateInvoiceModal from './DuplicateInvoiceModal';
 import MobilePhotoUploader from './MobilePhotoUploader';
 
 // Configure PDF.js worker
@@ -20,6 +21,10 @@ function InvoiceList({ entity }) {
     const [verificationData, setVerificationData] = useState(null);
     const [tempFilePath, setTempFilePath] = useState(null);
     const [isSaving, setIsSaving] = useState(false);
+
+    // Duplicate State
+    const [showDuplicateModal, setShowDuplicateModal] = useState(false);
+    const [duplicateData, setDuplicateData] = useState(null);
 
     // Edit State
     const [editingInvoice, setEditingInvoice] = useState(null);
@@ -154,18 +159,8 @@ function InvoiceList({ entity }) {
 
             // Handle duplicate invoice error
             if (error.response?.status === 409 && error.response?.data?.error === 'DUPLICATE_INVOICE') {
-                const existing = error.response.data.existingInvoice;
-                const createdDate = new Date(existing.createdAt).toLocaleDateString('pl-PL');
-                alert(
-                    `⚠️ FAKTURA JUŻ ISTNIEJE W BAZIE!\n\n` +
-                    `Numer: ${existing.invoiceNumber}\n` +
-                    `Kontrahent: ${existing.contractorName}\n` +
-                    `Kwota: ${existing.grossAmount} PLN\n` +
-                    `Data wystawienia: ${existing.issueDate || '-'}\n` +
-                    `Status: ${existing.status === 'paid' ? 'Opłacona' : existing.status === 'partial' ? 'Częściowo opłacona' : 'Nieopłacona'}\n` +
-                    `Dodana do systemu: ${createdDate}\n\n` +
-                    `System zablokował dodanie duplikatu.`
-                );
+                setDuplicateData({ existingInvoice: error.response.data.existingInvoice });
+                setShowDuplicateModal(true);
             } else {
                 alert('Błąd podczas zapisywania faktury.');
             }
@@ -183,6 +178,13 @@ function InvoiceList({ entity }) {
                 onConfirm={handleConfirm}
                 initialData={verificationData}
                 isSubmitting={isSaving}
+            />
+
+            {/* Duplicate Modal */}
+            <DuplicateInvoiceModal
+                isOpen={showDuplicateModal}
+                onClose={() => setShowDuplicateModal(false)}
+                duplicateData={duplicateData}
             />
 
             {/* Edit Modal */}

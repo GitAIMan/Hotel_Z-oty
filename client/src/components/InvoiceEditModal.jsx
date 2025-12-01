@@ -65,6 +65,17 @@ function InvoiceEditModal({ isOpen, onClose, onConfirm, invoice, isSubmitting })
                         />
                     </div>
 
+                    <div className="space-y-2">
+                        <label className="text-sm font-bold text-gray-500 uppercase tracking-wider">Numer Konta</label>
+                        <input
+                            type="text"
+                            value={formData.accountNumber || ''}
+                            onChange={(e) => handleChange('accountNumber', e.target.value)}
+                            className="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:border-gold-400 focus:bg-white transition-all font-medium font-mono"
+                            placeholder="XX XXXX XXXX XXXX XXXX XXXX XXXX"
+                        />
+                    </div>
+
                     <div className="grid grid-cols-2 gap-6">
                         <div className="space-y-2">
                             <label className="text-sm font-bold text-gray-500 uppercase tracking-wider">Kwota Netto</label>

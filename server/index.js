@@ -300,8 +300,16 @@ async function analyzeSettlementWithClaude(filesInput) {
 
                 // 5. DESCRIPTION CLEANING
                 let rawDescription = cols[6] + ' ' + (cols[9] || '');
-                // Remove 'Operacja: <digits>' and surrounding quotes/spaces
-                let description = rawDescription.replace(/'?Operacja:\s*[\d\w]+'?/gi, '').trim();
+                // Remove 'Operacja: <digits>', 'Rachunek odbiorcy :', 'Tytuł:', 'PRZELEW NA TELEFON OD: ...'
+                let description = rawDescription
+                    .replace(/'?Operacja:\s*[\d\w]+'?/gi, '')
+                    .replace(/Rachunek odbiorcy\s*:?\s*/gi, '')
+                    .replace(/Tytuł\s*:?\s*/gi, '')
+                    .replace(/PRZELEW NA TELEFON.*$/gi, 'PRZELEW NA TELEFON') // Keep just the main part, remove numbers if needed, or keep full if user wants details. User said: "Rachunek odbiorcy : Tytuł: PRZELEW NA TELEFON OD: ...". Let's just strip prefixes.
+                    .trim();
+
+                // Extra cleanup for double spaces
+                description = description.replace(/\s+/g, ' ');
 
                 payments.push({
                     date: date,
