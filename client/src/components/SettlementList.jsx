@@ -237,56 +237,79 @@ function SettlementList({ entity }) {
             />
 
             {/* Drag & Drop Zone - Consistent with InvoiceList */}
-            <div
-                className={`hidden md:block relative group cursor-pointer rounded-[2rem] border-4 border-dashed transition-all duration-500 p-8 lg:p-12 text-center
-          ${isDragging
-                        ? 'border-gold-500 bg-gold-50/50 scale-[1.01] shadow-2xl shadow-gold-100'
-                        : 'border-gray-200 hover:border-gold-400 hover:bg-white bg-white/60'
-                    }
-        `}
-                onDragOver={handleDragOver}
-                onDragLeave={handleDragLeave}
-                onDrop={handleDrop}
-                onClick={() => document.getElementById('settlement-file').click()}
-            >
-                <input
-                    id="settlement-file"
-                    type="file"
-                    className="hidden"
-                    onChange={(e) => {
-                        handleFileChange(e);
-                        // Auto submit on selection
-                        if (e.target.files[0]) {
-                            // We need to wrap this in a synthetic event or modify handleSubmit
-                            // Let's just call the logic directly
-                            const syntheticEvent = { preventDefault: () => { } };
-                            // We need to set file state first, but state updates are async.
-                            // Better to pass the file directly to a new submit handler or modify existing one.
-                            // For now, let's just trigger the existing flow but we need to be careful about state.
-                            // Actually, let's create a direct upload function to avoid state race conditions.
-                            handleDirectUpload(e.target.files[0]);
+            <div className="flex gap-4">
+                {/* Main Upload Area (PDF/Images) */}
+                <div
+                    className={`flex-1 relative group cursor-pointer rounded-[2rem] border-4 border-dashed transition-all duration-500 p-8 lg:p-12 text-center
+            ${isDragging
+                            ? 'border-gold-500 bg-gold-50/50 scale-[1.01] shadow-2xl shadow-gold-100'
+                            : 'border-gray-200 hover:border-gold-400 hover:bg-white bg-white/60'
                         }
-                    }}
-                    accept=".csv,.xls,.xlsx,.pdf,.jpg,.png"
-                />
+            `}
+                    onDragOver={handleDragOver}
+                    onDragLeave={handleDragLeave}
+                    onDrop={handleDrop}
+                    onClick={() => document.getElementById('settlement-file').click()}
+                >
+                    <input
+                        id="settlement-file"
+                        type="file"
+                        className="hidden"
+                        onChange={(e) => {
+                            handleFileChange(e);
+                            if (e.target.files[0]) {
+                                handleDirectUpload(e.target.files[0]);
+                            }
+                        }}
+                        accept=".pdf,.jpg,.png,.jpeg"
+                    />
 
-                <div className="flex flex-col items-center gap-4 lg:gap-6 pointer-events-none">
-                    <div className={`w-16 h-16 lg:w-20 lg:h-20 rounded-2xl flex items-center justify-center transition-all duration-500 ${isDragging ? 'bg-gold-500 text-white rotate-12' : 'bg-white shadow-xl text-gold-500 group-hover:scale-110'}`}>
-                        {isAnalyzing ? (
-                            <Loader2 size={32} className="animate-spin" />
-                        ) : (
-                            <Upload size={32} />
-                        )}
-                    </div>
+                    <div className="flex flex-col items-center gap-4 lg:gap-6 pointer-events-none">
+                        <div className={`w-16 h-16 lg:w-20 lg:h-20 rounded-2xl flex items-center justify-center transition-all duration-500 ${isDragging ? 'bg-gold-500 text-white rotate-12' : 'bg-white shadow-xl text-gold-500 group-hover:scale-110'}`}>
+                            {isAnalyzing ? (
+                                <Loader2 size={32} className="animate-spin" />
+                            ) : (
+                                <Upload size={32} />
+                            )}
+                        </div>
 
-                    <div className="space-y-2">
-                        <h3 className="text-xl lg:text-2xl font-serif font-bold text-gray-800 group-hover:text-gold-700 transition-colors">
-                            {isAnalyzing ? 'Analiza...' : 'Wgraj Wyciąg Bankowy'}
-                        </h3>
-                        <p className="text-gray-400 text-sm lg:text-base font-medium">
-                            {isAnalyzing ? 'Przetwarzanie...' : 'Kliknij lub upuść plik tutaj (CSV, Excel, PDF)'}
-                        </p>
+                        <div className="space-y-2">
+                            <h3 className="text-xl lg:text-2xl font-serif font-bold text-gray-800 group-hover:text-gold-700 transition-colors">
+                                {isAnalyzing ? 'Analiza AI...' : 'Wgraj Wyciąg (PDF/Foto)'}
+                            </h3>
+                            <p className="text-gray-400 text-sm lg:text-base font-medium">
+                                {isAnalyzing ? 'Przetwarzanie...' : 'Kliknij lub upuść plik tutaj'}
+                            </p>
+                        </div>
                     </div>
+                </div>
+
+                {/* CSV Upload Area (Separate Button) */}
+                <div
+                    className="w-1/3 relative group cursor-pointer rounded-[2rem] border-4 border-dashed border-blue-200 hover:border-blue-400 hover:bg-blue-50/30 bg-white/60 transition-all duration-500 p-8 flex flex-col items-center justify-center text-center"
+                    onClick={() => document.getElementById('csv-file').click()}
+                >
+                    <input
+                        id="csv-file"
+                        type="file"
+                        className="hidden"
+                        onChange={(e) => {
+                            if (e.target.files[0]) {
+                                handleDirectUpload(e.target.files[0]);
+                            }
+                        }}
+                        accept=".csv"
+                    />
+
+                    <div className="w-16 h-16 rounded-2xl bg-blue-50 text-blue-500 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform shadow-lg shadow-blue-100">
+                        <FileSpreadsheet size={32} />
+                    </div>
+                    <h3 className="text-xl font-serif font-bold text-gray-800 group-hover:text-blue-700 transition-colors">
+                        Import CSV
+                    </h3>
+                    <p className="text-gray-400 text-sm font-medium mt-2">
+                        Szybki import bez AI
+                    </p>
                 </div>
             </div>
 

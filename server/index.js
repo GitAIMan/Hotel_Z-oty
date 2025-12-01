@@ -156,6 +156,68 @@ async function analyzeSettlementWithClaude(filesInput) {
     // Handle both single file path (legacy/fallback) and array of file objects
     const files = Array.isArray(filesInput) ? filesInput : [{ path: filesInput }];
 
+    // 1. Check for CSV files - Process locally (FAST PATH)
+    const csvFile = files.find(f => f.originalname.toLowerCase().endsWith('.csv'));
+    if (csvFile) {
+        console.log(`Processing CSV file locally: ${csvFile.originalname}`);
+        try {
+            const fileContent = fs.readFileSync(csvFile.path, 'utf-8');
+            const lines = fileContent.split(/\r?\n/).filter(line => line.trim().length > 0);
+
+            const payments = [];
+
+            // Simple heuristic to find header row and data
+            // We assume standard columns might exist, or we just take all rows if no header found
+            // For now, let's assume a generic format or try to guess. 
+            // Since we don't know the exact bank format, we'll try to find lines with dates and amounts.
+
+            for (const line of lines) {
+                // Skip potential headers that don't look like data (no numbers)
+                if (!/\d/.test(line)) continue;
+
+                const parts = line.split(/[;,]/).map(p => p.trim().replace(/"/g, ''));
+
+                // We need at least a date and an amount
+                // Regex for date YYYY-MM-DD or DD.MM.YYYY
+                const dateMatch = line.match(/(\d{4}-\d{2}-\d{2})|(\d{2}\.\d{2}\.\d{4})/);
+                // Regex for amount (number with optional decimal)
+                const amountMatch = line.match(/-?\d+[.,]\d{2}/);
+
+                if (dateMatch && amountMatch) {
+                    let date = dateMatch[0];
+                    // Normalize date to YYYY-MM-DD
+                    if (date.includes('.')) {
+                        const [d, m, y] = date.split('.');
+                        date = `${y}-${m}-${d}`;
+                    }
+
+                    let amountStr = amountMatch[0].replace(',', '.');
+                    let amount = parseFloat(amountStr);
+
+                    // Try to find contractor/description in other parts
+                    // Join parts that are NOT date or amount
+                    const description = parts.filter(p => !p.includes(dateMatch[0]) && !p.includes(amountMatch[0])).join(' ');
+
+                    payments.push({
+                        date: date,
+                        amount: Math.abs(amount), // Store absolute value
+                        type: amount < 0 ? 'outgoing' : 'incoming',
+                        contractor: description.substring(0, 50), // Guess contractor from start of desc
+                        description: description
+                    });
+                }
+            }
+
+            console.log(`CSV Local Parse: Found ${payments.length} transactions.`);
+            return { payments };
+
+        } catch (error) {
+            console.error("CSV Local Parse Error:", error);
+            throw new Error("Failed to parse CSV file locally");
+        }
+    }
+
+    // 2. Fallback to AI for PDF/Images
     const content = [];
 
     // Add images/documents/text
@@ -164,6 +226,7 @@ async function analyzeSettlementWithClaude(filesInput) {
         const ext = path.extname(filePath).toLowerCase();
 
         if (ext === '.csv' || ext === '.txt') {
+            // Should be handled above, but keep as fallback for .txt
             const fileContent = fs.readFileSync(filePath, 'utf-8');
             content.push({
                 type: "text",

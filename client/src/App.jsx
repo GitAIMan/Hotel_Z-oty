@@ -1,8 +1,8 @@
 import { useState, createContext, useContext } from 'react';
 import InvoiceList from './components/InvoiceList';
 import SettlementList from './components/SettlementList';
-import HistoryList from './components/HistoryList';
-import { FileText, DollarSign, Clock, LayoutDashboard, Building2 } from 'lucide-react';
+import TransactionHistory from './components/TransactionHistory';
+import { FileText, DollarSign, Clock, LayoutDashboard, Building2, TableProperties } from 'lucide-react';
 
 // Context for Entity (Hotel)
 export const EntityContext = createContext();
@@ -92,7 +92,8 @@ function App() {
                 <div className="flex flex-col">
                   <TabButton id="invoices" label="Faktury" icon={FileText} />
                   <TabButton id="settlements" label="Rozliczenia" icon={DollarSign} />
-                  <TabButton id="history" label="Historia" icon={Clock} />
+                  <TabButton id="history" label="Transakcje" icon={TableProperties} />
+                  <TabButton id="logs" label="Logi Systemu" icon={Clock} />
                 </div>
                 <div className="p-8 mt-4 border-t border-gray-100">
                   <div className="bg-gradient-to-br from-gray-900 to-gray-800 rounded-xl p-6 text-white shadow-lg">
@@ -112,7 +113,8 @@ function App() {
               <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
                 {activeTab === 'invoices' && <InvoiceList entity={entity} />}
                 {activeTab === 'settlements' && <SettlementList entity={entity} />}
-                {activeTab === 'history' && <HistoryList entity={entity} />}
+                {activeTab === 'history' && <TransactionHistory entity={entity} />}
+                {activeTab === 'logs' && <HistoryList entity={entity} />}
               </div>
             </div>
           </div>
@@ -140,8 +142,8 @@ function App() {
             onClick={() => setActiveTab('history')}
             className={`flex flex-col items-center gap-1 p-2 rounded-xl transition-colors w-20 ${activeTab === 'history' ? 'text-gold-600 bg-gold-50' : 'text-gray-400'}`}
           >
-            <Clock size={24} />
-            <span className="text-[10px] font-bold uppercase tracking-wider">Historia</span>
+            <TableProperties size={24} />
+            <span className="text-[10px] font-bold uppercase tracking-wider">Transakcje</span>
           </button>
         </div>
 

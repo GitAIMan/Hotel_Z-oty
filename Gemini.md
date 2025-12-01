@@ -1,3 +1,18 @@
+# 💎 Złoty Groń - System Rozliczeń AI (v1.9.2)
+
+**Status**: Produkcja (Railway) 🟢
+**Baza**: PostgreSQL (Managed) 🐘
+**AI**: Claude 4.5 Sonnet 🧠
+
+## 📅 Osiągnięcia Sesji (28.11.2024):
+1. **Migracja Bazy**: Przejście z SQLite na PostgreSQL (Railway) - dane są bezpieczne i trwałe.
+2. **Ochrona Danych**: Blokada duplikatów faktur (Backend + Frontend Alert).
+3. **UX/UI**: Nowy, lżejszy interfejs uploadu (Drag & Drop) spójny dla Faktur i Rozliczeń.
+
+---
+
+## Uwagi Techniczne:
+- **Model AI**: System domyślnie pyta o `claude-4-5-sonnet-20250929`.
 - **UI**: Zastosowano podejście "Mobile First", ale zoptymalizowane pod duże ekrany ("Ultra Wide").
 - **Bezpieczeństwo**: Klucze API przechowywane w `.env`.
 
@@ -97,3 +112,6 @@
     - ⚠️ **User Alert**: W przypadku duplikatu system zwraca błąd 409 Conflict z szczegółami istniejącej faktury.
     - 📋 **Detailed Info**: Frontend pokazuje alert z informacjami: numer, kontrahent, kwota, status, data dodania.
     - 🚫 **Prevention**: Niemożliwe przypadkowe dodanie tej samej faktury dwa razy.
+- **v1.9.2** (28.11.2024 - UI Polish):
+    - 🎨 **UI Resizing**: Zmniejszono obszar "Dodaj fakturę" (mniejszy padding, ikony i tekst) dla lepszej czytelności na PC i mobile.
+    - 🔄 **Settlements UI**: Ujednolicono wygląd "Wgraj Wyciąg" w Rozliczeniach - teraz wygląda tak samo jak w Fakturach (Drag & Drop), zachowując spójny styl.

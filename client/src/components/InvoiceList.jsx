@@ -164,7 +164,7 @@ function InvoiceList({ entity }) {
                     `Data wystawienia: ${existing.issueDate || '-'}\n` +
                     `Status: ${existing.status === 'paid' ? 'Opłacona' : existing.status === 'partial' ? 'Częściowo opłacona' : 'Nieopłacona'}\n` +
                     `Dodana do systemu: ${createdDate}\n\n` +
-                    `Nie można dodać tej samej faktury ponownie.`
+                    `System zablokował dodanie duplikatu.`
                 );
             } else {
                 alert('Błąd podczas zapisywania faktury.');
