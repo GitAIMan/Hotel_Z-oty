@@ -407,7 +407,7 @@ function InvoiceList({ entity }) {
                                             >
                                                 <DollarSign size={16} />
                                             </button>
-                                            {inv.status === 'paid' && (
+                                            {inv.matchedSettlementFile && (
                                                 <button
                                                     onClick={() => handleUnlinkInvoice(inv)}
                                                     className="p-2 text-gray-400 hover:text-orange-500 hover:bg-orange-50 rounded-full transition-colors"
