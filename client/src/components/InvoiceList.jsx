@@ -317,10 +317,10 @@ function InvoiceList({ entity }) {
                     </span>
                 </div>
 
-                <div className="overflow-x-auto hidden md:block">
+                <div className="overflow-x-auto hidden md:block border border-gray-300 rounded-lg shadow-sm">
                     <table className="w-full">
                         <thead>
-                            <tr className="bg-amber-100/50 text-left border-b border-amber-100">
+                            <tr className="bg-amber-100/50 text-left border-b-2 border-amber-200">
                                 <th className="py-3 px-4 font-bold text-amber-900/60 uppercase tracking-wider text-xs">Dokument</th>
                                 <th className="py-3 px-4 font-bold text-amber-900/60 uppercase tracking-wider text-xs">Kontrahent</th>
                                 <th className="py-3 px-4 font-bold text-amber-900/60 uppercase tracking-wider text-xs">Kwota Brutto</th>
@@ -331,7 +331,7 @@ function InvoiceList({ entity }) {
                         </thead>
                         <tbody className="divide-y divide-amber-50/50">
                             {invoices.map((inv) => (
-                                <tr key={inv.id} className="hover:bg-amber-50/50 transition-colors group border-b border-gray-200">
+                                <tr key={inv.id} className="hover:bg-amber-50/70 transition-colors group border-b border-gray-300">
                                     <td className="py-4 px-4">
                                         <div className="flex items-center gap-3">
                                             <div className="p-2 bg-white border border-amber-100 rounded-lg text-amber-500 shadow-sm group-hover:border-amber-300 transition-colors">
@@ -407,7 +407,7 @@ function InvoiceList({ entity }) {
                                             >
                                                 <DollarSign size={16} />
                                             </button>
-                                            {inv.matchedSettlementFile && (
+                                            {inv.status === 'paid' && (
                                                 <button
                                                     onClick={() => handleUnlinkInvoice(inv)}
                                                     className="p-2 text-gray-400 hover:text-orange-500 hover:bg-orange-50 rounded-full transition-colors"
