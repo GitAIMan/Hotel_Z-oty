@@ -723,7 +723,7 @@ app.post('/api/invoices/:id/unlink-transaction', async (req, res) => {
             if (settlement && settlement.paymentsData) {
                 // 4. Find and unmark the transaction
                 const payments = JSON.parse(JSON.stringify(settlement.paymentsData));
-                const payment = payments.find(p => p.matchedInvoiceId === invoice.id);
+                const payment = payments.find(p => p.matchedInvoiceId == invoice.id);
 
                 if (payment) {
                     payment.matchStatus = 'unmatched';

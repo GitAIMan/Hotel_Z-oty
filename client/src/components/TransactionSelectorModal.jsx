@@ -138,7 +138,7 @@ const TransactionSelectorModal = ({ isOpen, onClose, onSelect, entity }) => {
 
                                                     <button
                                                         onClick={() => onSelect(settlement.id, payment.id)}
-                                                        disabled={payment.matchStatus === 'matched'} // Disable if already matched? Or allow overwrite? User asked to correct errors, so maybe allow.
+                                                        // disabled={payment.matchStatus === 'matched'} // Allow selection even if matched (to correct errors)
                                                         // Let's allow it but warn visually? For now, just standard button.
                                                         className="px-4 py-2 bg-white border border-gold-200 text-gold-700 rounded-lg text-sm font-medium hover:bg-gold-50 hover:border-gold-300 transition-all opacity-0 group-hover:opacity-100 focus:opacity-100"
                                                     >
