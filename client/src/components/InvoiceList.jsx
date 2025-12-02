@@ -227,13 +227,12 @@ function InvoiceList({ entity }) {
                 isSubmitting={isSaving}
             />
 
-            {/* Edit Modal */}
-            <InvoiceEditModal
-                isOpen={!!editingInvoice}
-                onClose={() => setEditingInvoice(null)}
-                onConfirm={handleUpdateInvoice}
-                invoice={editingInvoice}
-                isSubmitting={isSaving}
+            {/* Link Transaction Modal */}
+            <TransactionSelectorModal
+                isOpen={showLinkModal}
+                onClose={() => setShowLinkModal(false)}
+                onSelect={handleLinkTransaction}
+                entity={entity}
             />
 
             {/* Mobile Photo Uploader */}
