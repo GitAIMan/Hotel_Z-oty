@@ -663,8 +663,24 @@ app.post('/api/invoices/:id/link-transaction', async (req, res) => {
         const payment = payments[paymentIndex];
 
         // 4. Update Payment Match Status
-        // Check if already matched to another invoice? Maybe allow overwrite?
-        // Let's allow overwrite for manual correction.
+        // Check if already matched to another invoice?
+        if (payment.matchStatus === 'matched' && payment.matchedInvoiceId) {
+            // If it was matched to a different invoice, we need to unlink that one first
+            if (payment.matchedInvoiceId != invoice.id) {
+                try {
+                    const oldInvoice = await Invoice.findByPk(payment.matchedInvoiceId);
+                    if (oldInvoice) {
+                        oldInvoice.status = 'unpaid';
+                        oldInvoice.matchedSettlementFile = null;
+                        await oldInvoice.save();
+                        console.log(`   🔄 Unlinked old invoice ${oldInvoice.invoiceNumber} from payment ${payment.id}`);
+                    }
+                } catch (err) {
+                    console.error("Error unlinking old invoice:", err);
+                }
+            }
+        }
+
         payment.matchedInvoiceId = invoice.id;
         payment.matchedInvoiceNumber = invoice.invoiceNumber;
         payment.matchStatus = 'matched';
@@ -723,7 +739,11 @@ app.post('/api/invoices/:id/unlink-transaction', async (req, res) => {
             if (settlement && settlement.paymentsData) {
                 // 4. Find and unmark the transaction
                 const payments = JSON.parse(JSON.stringify(settlement.paymentsData));
-                const payment = payments.find(p => p.matchedInvoiceId == invoice.id);
+                // Try finding by ID first (loose equality), then by Invoice Number
+                let payment = payments.find(p => p.matchedInvoiceId == invoice.id);
+                if (!payment) {
+                    payment = payments.find(p => p.matchedInvoiceNumber === invoice.invoiceNumber);
+                }
 
                 if (payment) {
                     payment.matchStatus = 'unmatched';
