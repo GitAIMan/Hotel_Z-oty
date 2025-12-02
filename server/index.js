@@ -758,6 +758,63 @@ app.post('/api/invoices/:id/unlink-transaction', async (req, res) => {
     }
 });
 
+});
+
+// 3d. Unlink All Transactions from Settlement
+app.post('/api/settlements/:id/unlink-all', async (req, res) => {
+    const { id } = req.params;
+
+    try {
+        // 1. Find Settlement
+        const settlement = await Settlement.findByPk(id);
+        if (!settlement) return res.status(404).json({ error: 'Settlement not found' });
+
+        // 2. Get all matched payments
+        const payments = settlement.paymentsData || [];
+        // We need to check all payments that are matched
+        const matchedPayments = payments.filter(p => p.matchStatus === 'matched');
+
+        console.log(`🔓 Unlinking all ${matchedPayments.length} transactions from settlement ${settlement.fileName}`);
+
+        // 3. Find and update all linked invoices
+        for (const payment of matchedPayments) {
+            if (payment.matchedInvoiceId) {
+                const invoice = await Invoice.findByPk(payment.matchedInvoiceId);
+                if (invoice) {
+                    await invoice.update({
+                        status: 'unpaid',
+                        matchedSettlementFile: null
+                    });
+                }
+            }
+
+            // 4. Unlink payment
+            payment.matchStatus = 'unmatched';
+            payment.matchedInvoiceId = null;
+            payment.matchedInvoiceNumber = null;
+        }
+
+        // 5. Save settlement
+        settlement.paymentsData = payments;
+        settlement.totalProcessed = 0;
+        settlement.changed('paymentsData', true);
+        await settlement.save();
+
+        // 6. History
+        await History.create({
+            entity: settlement.entity,
+            action: 'SETTLEMENT_UNLINK_ALL',
+            description: `Unlinked all transactions from settlement ${settlement.fileName}`
+        });
+
+        res.json({ success: true, unlinkedCount: matchedPayments.length });
+
+    } catch (err) {
+        console.error('Unlink all failed:', err);
+        res.status(500).json({ error: err.message });
+    }
+});
+
 // 4. Settlements List (with Robust Auto-Healing)
 app.get('/api/settlements', async (req, res) => {
     const { entity } = req.query;

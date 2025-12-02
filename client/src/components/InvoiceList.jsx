@@ -9,6 +9,7 @@ import DuplicateInvoiceModal from './DuplicateInvoiceModal';
 
 import MobilePhotoUploader from './MobilePhotoUploader';
 import TransactionSelectorModal from './TransactionSelectorModal';
+import ConfirmUnlinkModal from './ConfirmUnlinkModal';
 import { linkInvoiceToTransaction, unlinkInvoiceFromTransaction } from '../api';
 
 // Configure PDF.js worker
@@ -35,6 +36,9 @@ function InvoiceList({ entity }) {
     // Manual Link State
     const [showLinkModal, setShowLinkModal] = useState(false);
     const [linkInvoiceId, setLinkInvoiceId] = useState(null);
+
+    // Unlink State
+    const [unlinkingInvoice, setUnlinkingInvoice] = useState(null);
 
     const fileInputRef = useRef(null);
 
@@ -200,21 +204,42 @@ function InvoiceList({ entity }) {
         }
     };
 
-    const handleUnlinkInvoice = async (invoice) => {
-        if (!window.confirm(`Czy na pewno chcesz odłączyć fakturę ${invoice.invoiceNumber} od rozliczenia?`)) {
+    const handleUnlinkClick = (invoice) => {
+        if (!invoice.matchedSettlementFile) {
+            setUnlinkingInvoice({
+                ...invoice,
+                isInfoOnly: true,
+                title: 'Brak powiązania',
+                message: 'Ta faktura nie jest połączona z żadnym rozliczeniem.'
+            });
+            return;
+        }
+
+        setUnlinkingInvoice({
+            ...invoice,
+            isInfoOnly: false,
+            title: 'Potwierdzenie odłączenia',
+            message: `Czy na pewno chcesz odłączyć fakturę ${invoice.invoiceNumber} od rozliczenia?`
+        });
+    };
+
+    const handleConfirmUnlink = async () => {
+        if (!unlinkingInvoice || unlinkingInvoice.isInfoOnly) {
+            setUnlinkingInvoice(null);
             return;
         }
 
         setIsSaving(true);
         try {
-            await unlinkInvoiceFromTransaction(invoice.id);
+            await unlinkInvoiceFromTransaction(unlinkingInvoice.id);
             fetchInvoices();
-            alert('Faktura została odłączona od rozliczenia.');
+            // Alert is handled by modal success state or just close
         } catch (error) {
             console.error('Error unlinking:', error);
             alert('Błąd podczas odłączania: ' + (error.response?.data?.error || error.message));
         } finally {
             setIsSaving(false);
+            setUnlinkingInvoice(null);
         }
     };
 
@@ -251,6 +276,17 @@ function InvoiceList({ entity }) {
                 onClose={() => setShowLinkModal(false)}
                 onSelect={handleLinkTransaction}
                 entity={entity}
+            />
+
+            {/* Unlink Confirmation Modal */}
+            <ConfirmUnlinkModal
+                isOpen={!!unlinkingInvoice}
+                onClose={() => setUnlinkingInvoice(null)}
+                onConfirm={handleConfirmUnlink}
+                title={unlinkingInvoice?.title}
+                message={unlinkingInvoice?.message}
+                isInfoOnly={unlinkingInvoice?.isInfoOnly}
+                isSubmitting={isSaving}
             />
 
             {/* Mobile Photo Uploader */}
@@ -407,15 +443,16 @@ function InvoiceList({ entity }) {
                                             >
                                                 <DollarSign size={16} />
                                             </button>
-                                            {inv.matchedSettlementFile && (
-                                                <button
-                                                    onClick={() => handleUnlinkInvoice(inv)}
-                                                    className="p-2 text-gray-400 hover:text-orange-500 hover:bg-orange-50 rounded-full transition-colors"
-                                                    title="Odłącz od rozliczenia"
-                                                >
-                                                    <Unlink size={16} />
-                                                </button>
-                                            )}
+                                            <button
+                                                onClick={() => handleUnlinkClick(inv)}
+                                                className={`p-2 rounded-full transition-colors ${inv.matchedSettlementFile
+                                                    ? 'text-gray-400 hover:text-orange-500 hover:bg-orange-50'
+                                                    : 'text-gray-300 hover:text-gray-500 hover:bg-gray-50'
+                                                    }`}
+                                                title={inv.matchedSettlementFile ? "Odłącz od rozliczenia" : "Brak powiązania"}
+                                            >
+                                                <Unlink size={16} />
+                                            </button>
                                         </div>
                                     </td>
                                 </tr>
@@ -497,14 +534,15 @@ function InvoiceList({ entity }) {
                                     >
                                         <Trash2 size={18} />
                                     </button>
-                                    {inv.status !== 'paid' && (
-                                        <button
-                                            onClick={() => handleLinkClick(inv)}
-                                            className="p-2 text-gray-400 hover:text-green-500 bg-gray-50 rounded-full"
-                                        >
-                                            <DollarSign size={18} />
-                                        </button>
-                                    )}
+                                    <button
+                                        onClick={() => handleUnlinkClick(inv)}
+                                        className={`p-2 rounded-full ${inv.matchedSettlementFile
+                                            ? 'text-gray-400 hover:text-orange-500 bg-gray-50'
+                                            : 'text-gray-300 hover:text-gray-500 bg-gray-50'
+                                            }`}
+                                    >
+                                        <Unlink size={18} />
+                                    </button>
                                 </div>
                             </div>
                         </div>

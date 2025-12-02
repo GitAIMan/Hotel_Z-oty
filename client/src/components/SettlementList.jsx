@@ -4,6 +4,9 @@ import { Upload, FileSpreadsheet, Trash2, Loader2, Eye } from 'lucide-react';
 import SettlementVerificationModal from './SettlementVerificationModal';
 import SettlementDetailsModal from './SettlementDetailsModal';
 import MobilePhotoUploader from './MobilePhotoUploader';
+import ConfirmUnlinkModal from './ConfirmUnlinkModal';
+import { Unlink } from 'lucide-react';
+import { unlinkAllFromSettlement } from '../api';
 
 function SettlementList({ entity }) {
     const [settlements, setSettlements] = useState([]);
@@ -20,6 +23,9 @@ function SettlementList({ entity }) {
 
     // Details State
     const [selectedSettlement, setSelectedSettlement] = useState(null);
+
+    // Unlink State
+    const [unlinkingSettlement, setUnlinkingSettlement] = useState(null);
 
     useEffect(() => {
         fetchSettlements();
@@ -174,6 +180,44 @@ function SettlementList({ entity }) {
         }
     };
 
+    const handleUnlinkClick = (settlement) => {
+        if (!settlement.totalProcessed || settlement.totalProcessed === 0) {
+            setUnlinkingSettlement({
+                ...settlement,
+                isInfoOnly: true,
+                title: 'Brak powiązania',
+                message: 'To rozliczenie nie ma żadnych sparowanych faktur.'
+            });
+            return;
+        }
+
+        setUnlinkingSettlement({
+            ...settlement,
+            isInfoOnly: false,
+            title: 'Potwierdzenie odłączenia',
+            message: `Czy na pewno chcesz odłączyć wszystkie ${settlement.totalProcessed} transakcje z rozliczenia ${settlement.fileName}?`
+        });
+    };
+
+    const handleConfirmUnlink = async () => {
+        if (!unlinkingSettlement || unlinkingSettlement.isInfoOnly) {
+            setUnlinkingSettlement(null);
+            return;
+        }
+
+        setIsSaving(true);
+        try {
+            await unlinkAllFromSettlement(unlinkingSettlement.id);
+            fetchSettlements();
+        } catch (error) {
+            console.error('Error unlinking settlement:', error);
+            alert('Błąd podczas odłączania: ' + (error.response?.data?.error || error.message));
+        } finally {
+            setIsSaving(false);
+            setUnlinkingSettlement(null);
+        }
+    };
+
     return (
         <div className="space-y-10">
             {/* Verification Modal */}
@@ -190,6 +234,17 @@ function SettlementList({ entity }) {
                 isOpen={!!selectedSettlement}
                 onClose={() => setSelectedSettlement(null)}
                 settlement={selectedSettlement}
+            />
+
+            {/* Unlink Confirmation Modal */}
+            <ConfirmUnlinkModal
+                isOpen={!!unlinkingSettlement}
+                onClose={() => setUnlinkingSettlement(null)}
+                onConfirm={handleConfirmUnlink}
+                title={unlinkingSettlement?.title}
+                message={unlinkingSettlement?.message}
+                isInfoOnly={unlinkingSettlement?.isInfoOnly}
+                isSubmitting={isSaving}
             />
 
             {/* Mobile Photo Uploader */}
@@ -371,6 +426,16 @@ function SettlementList({ entity }) {
                                             >
                                                 <Trash2 size={20} />
                                             </button>
+                                            <button
+                                                onClick={() => handleUnlinkClick(s)}
+                                                className={`p-2 rounded-full transition-colors border border-transparent ${s.totalProcessed > 0
+                                                    ? 'text-gray-500 hover:text-orange-600 hover:bg-orange-50 hover:border-orange-100'
+                                                    : 'text-gray-300 hover:text-gray-500 hover:bg-gray-50'
+                                                    }`}
+                                                title={s.totalProcessed > 0 ? "Odłącz wszystkie powiązania" : "Brak powiązań"}
+                                            >
+                                                <Unlink size={20} />
+                                            </button>
                                         </div>
                                     </td>
                                 </tr>
@@ -423,6 +488,15 @@ function SettlementList({ entity }) {
                                         title="Usuń rozliczenie"
                                     >
                                         <Trash2 size={16} />
+                                    </button>
+                                    <button
+                                        onClick={() => handleUnlinkClick(s)}
+                                        className={`p-2 rounded-full border border-gray-100 ${s.totalProcessed > 0
+                                            ? 'text-gray-500 hover:text-orange-600 bg-gray-50'
+                                            : 'text-gray-300 hover:text-gray-500 bg-gray-50'
+                                            }`}
+                                    >
+                                        <Unlink size={16} />
                                     </button>
                                 </div>
                             </div>
