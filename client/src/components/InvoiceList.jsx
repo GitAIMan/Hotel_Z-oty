@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import api from '../api';
-import { UploadCloud, FileText, CheckCircle, Loader2, AlertCircle, Calendar, CreditCard, Trash2, Edit2 } from 'lucide-react';
+import { UploadCloud, FileText, CheckCircle, Loader2, AlertCircle, Calendar, CreditCard, Trash2, Edit2, DollarSign } from 'lucide-react';
 import * as pdfjsLib from 'pdfjs-dist';
 import pdfWorker from 'pdfjs-dist/build/pdf.worker.min.mjs?url';
 import InvoiceVerificationModal from './InvoiceVerificationModal';
