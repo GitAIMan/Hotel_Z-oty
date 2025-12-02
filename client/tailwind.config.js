@@ -21,8 +21,8 @@ export default {
                 },
             },
             fontFamily: {
-                sans: ['Inter', 'sans-serif'],
-                serif: ['Playfair Display', 'serif'],
+                sans: ['Roboto', 'sans-serif'],
+                serif: ['Roboto', 'sans-serif'],
             },
             backgroundImage: {
                 'gold-gradient': 'linear-gradient(135deg, #BF953F 0%, #FCF6BA 50%, #B38728 100%)',

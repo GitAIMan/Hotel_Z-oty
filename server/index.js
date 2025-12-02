@@ -8,6 +8,7 @@ const Anthropic = require('@anthropic-ai/sdk');
 const iconv = require('iconv-lite');
 const { initDb, Invoice, Settlement, History, sequelize } = require('./db');
 const { Op } = require('sequelize');
+const crypto = require('crypto');
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -317,7 +318,9 @@ async function analyzeSettlementWithClaude(filesInput) {
                     type: amount < 0 ? 'outgoing' : 'incoming',
                     contractor: contractor,
                     description: description,
-                    category: category
+                    description: description,
+                    category: category,
+                    id: crypto.randomUUID() // Unique ID for linking
                 });
             }
 
@@ -406,7 +409,16 @@ async function analyzeSettlementWithClaude(filesInput) {
         const jsonMatch = jsonString.match(/\{[\s\S]*\}/);
         if (!jsonMatch) throw new Error("No JSON found in response");
 
-        return JSON.parse(jsonMatch[0]);
+        const result = JSON.parse(jsonMatch[0]);
+
+        // Ensure every payment has an ID
+        if (result.payments && Array.isArray(result.payments)) {
+            result.payments.forEach(p => {
+                if (!p.id) p.id = crypto.randomUUID();
+            });
+        }
+
+        return result;
 
     } catch (error) {
         console.error("Claude Settlement Analysis Failed:", error);
@@ -618,6 +630,70 @@ app.post('/api/invoices/confirm', async (req, res) => {
         res.status(201).json(newInvoice);
     } catch (err) {
         console.error("Confirmation failed:", err);
+        res.status(500).json({ error: err.message });
+    }
+}
+});
+
+// 3b. Manual Link Transaction to Invoice
+app.post('/api/invoices/:id/link-transaction', async (req, res) => {
+    const { id } = req.params;
+    const { settlementId, paymentId } = req.body;
+
+    try {
+        // 1. Find Invoice
+        const invoice = await Invoice.findByPk(id);
+        if (!invoice) return res.status(404).json({ error: 'Invoice not found' });
+
+        // 2. Find Settlement
+        const settlement = await Settlement.findByPk(settlementId);
+        if (!settlement) return res.status(404).json({ error: 'Settlement not found' });
+
+        // 3. Find Payment in Settlement
+        if (!settlement.paymentsData || !Array.isArray(settlement.paymentsData)) {
+            return res.status(400).json({ error: 'Settlement has no payments' });
+        }
+
+        const payments = JSON.parse(JSON.stringify(settlement.paymentsData));
+        const paymentIndex = payments.findIndex(p => p.id === paymentId);
+
+        if (paymentIndex === -1) {
+            return res.status(404).json({ error: 'Payment transaction not found in settlement' });
+        }
+
+        const payment = payments[paymentIndex];
+
+        // 4. Update Payment Match Status
+        // Check if already matched to another invoice? Maybe allow overwrite?
+        // Let's allow overwrite for manual correction.
+        payment.matchedInvoiceId = invoice.id;
+        payment.matchedInvoiceNumber = invoice.invoiceNumber;
+        payment.matchStatus = 'matched';
+
+        // 5. Update Invoice Status
+        invoice.status = 'paid';
+        invoice.matchedSettlementFile = settlement.fileName;
+
+        // 6. Save Changes
+        settlement.paymentsData = payments;
+        settlement.totalProcessed = payments.filter(p => p.matchStatus === 'matched').length;
+        settlement.changed('paymentsData', true);
+
+        await settlement.save();
+        await invoice.save();
+
+        await History.create({
+            entity: invoice.entity,
+            action: 'MANUAL_LINK',
+            description: `Manually linked invoice ${invoice.invoiceNumber} to transaction ${payment.description} in settlement ${settlement.fileName}`
+        });
+
+        console.log(`🔗 Manually linked Invoice ${invoice.id} to Payment ${paymentId}`);
+
+        res.json({ success: true, invoice, settlement });
+
+    } catch (err) {
+        console.error("Manual linking failed:", err);
         res.status(500).json({ error: err.message });
     }
 });
