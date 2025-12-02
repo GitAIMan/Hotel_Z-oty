@@ -345,8 +345,8 @@ function InvoiceList({ entity }) {
                                         <p className="font-bold text-gray-900 text-2xl">{inv.grossAmount} <span className="text-base text-gray-400 font-normal">PLN</span></p>
                                         {inv.netAmount && <p className="text-sm text-gray-400">Netto: {inv.netAmount}</p>}
                                     </td>
-                                    <td className="py-6 px-8">
-                                        <div className="flex flex-col gap-2 text-base text-gray-500">
+                                    <td className="py-6 px-4">
+                                        <div className="flex flex-col gap-2 text-base text-gray-500 whitespace-nowrap">
                                             <div className="flex items-center gap-2">
                                                 <Calendar size={16} className="text-amber-300" />
                                                 <span>Wyst: {inv.issueDate || '-'}</span>
