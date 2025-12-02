@@ -697,6 +697,67 @@ app.post('/api/invoices/:id/link-transaction', async (req, res) => {
     }
 });
 
+// 3c. Unlink Transaction from Invoice
+app.post('/api/invoices/:id/unlink-transaction', async (req, res) => {
+    const { id } = req.params;
+
+    try {
+        // 1. Find Invoice
+        const invoice = await Invoice.findByPk(id);
+        if (!invoice) return res.status(404).json({ error: 'Invoice not found' });
+
+        // 2. Check if invoice is linked
+        if (!invoice.matchedSettlementFile) {
+            return res.status(400).json({ error: 'Invoice is not linked to any settlement' });
+        }
+
+        const linkedFileName = invoice.matchedSettlementFile;
+
+        // 3. Find Settlement
+        const settlement = await Settlement.findOne({
+            where: { fileName: linkedFileName }
+        });
+
+        if (settlement && settlement.paymentsData) {
+            // 4. Find and unmark the transaction
+            const payments = JSON.parse(JSON.stringify(settlement.paymentsData));
+            const payment = payments.find(p => p.matchedInvoiceId === invoice.id);
+
+            if (payment) {
+                payment.matchStatus = 'unmatched';
+                payment.matchedInvoiceId = null;
+                payment.matchedInvoiceNumber = null;
+
+                settlement.paymentsData = payments;
+                settlement.totalProcessed = payments.filter(p => p.matchStatus === 'matched').length;
+                settlement.changed('paymentsData', true);
+                await settlement.save();
+            }
+        }
+
+        // 5. Unlink Invoice
+        await invoice.update({
+            status: 'unpaid',
+            matchedSettlementFile: null
+        });
+
+        // 6. History
+        await History.create({
+            entity: invoice.entity || 'zloty_gron',
+            action: 'MANUAL_UNLINK',
+            description: `Manually unlinked invoice ${invoice.invoiceNumber} from settlement ${linkedFileName}`
+        });
+
+        console.log(`🔓 Manually unlinked Invoice ${invoice.id} from ${linkedFileName}`);
+
+        res.json({ success: true, invoice });
+
+    } catch (err) {
+        console.error("Manual unlinking failed:", err);
+        res.status(500).json({ error: err.message });
+    }
+});
+
 // 4. Settlements List (with Robust Auto-Healing)
 app.get('/api/settlements', async (req, res) => {
     const { entity } = req.query;

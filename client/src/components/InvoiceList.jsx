@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import api from '../api';
-import { UploadCloud, FileText, CheckCircle, Loader2, AlertCircle, Calendar, CreditCard, Trash2, Edit2, DollarSign } from 'lucide-react';
+import { UploadCloud, FileText, CheckCircle, Loader2, AlertCircle, Calendar, CreditCard, Trash2, Edit2, DollarSign, Unlink } from 'lucide-react';
 import * as pdfjsLib from 'pdfjs-dist';
 import pdfWorker from 'pdfjs-dist/build/pdf.worker.min.mjs?url';
 import InvoiceVerificationModal from './InvoiceVerificationModal';
@@ -9,7 +9,7 @@ import DuplicateInvoiceModal from './DuplicateInvoiceModal';
 
 import MobilePhotoUploader from './MobilePhotoUploader';
 import TransactionSelectorModal from './TransactionSelectorModal';
-import { linkInvoiceToTransaction } from '../api';
+import { linkInvoiceToTransaction, unlinkInvoiceFromTransaction } from '../api';
 
 // Configure PDF.js worker
 pdfjsLib.GlobalWorkerOptions.workerSrc = pdfWorker;
@@ -195,6 +195,24 @@ function InvoiceList({ entity }) {
         } catch (error) {
             console.error('Error linking transaction:', error);
             alert('Błąd podczas łączenia: ' + (error.response?.data?.error || error.message));
+        } finally {
+            setIsSaving(false);
+        }
+    };
+
+    const handleUnlinkInvoice = async (invoice) => {
+        if (!window.confirm(`Czy na pewno chcesz odłączyć fakturę ${invoice.invoiceNumber} od rozliczenia?`)) {
+            return;
+        }
+
+        setIsSaving(true);
+        try {
+            await unlinkInvoiceFromTransaction(invoice.id);
+            fetchInvoices();
+            alert('Faktura została odłączona od rozliczenia.');
+        } catch (error) {
+            console.error('Error unlinking:', error);
+            alert('Błąd podczas odłączania: ' + (error.response?.data?.error || error.message));
         } finally {
             setIsSaving(false);
         }
@@ -389,6 +407,15 @@ function InvoiceList({ entity }) {
                                             >
                                                 <DollarSign size={16} />
                                             </button>
+                                            {inv.matchedSettlementFile && (
+                                                <button
+                                                    onClick={() => handleUnlinkInvoice(inv)}
+                                                    className="p-2 text-gray-400 hover:text-orange-500 hover:bg-orange-50 rounded-full transition-colors"
+                                                    title="Odłącz od rozliczenia"
+                                                >
+                                                    <Unlink size={16} />
+                                                </button>
+                                            )}
                                         </div>
                                     </td>
                                 </tr>
