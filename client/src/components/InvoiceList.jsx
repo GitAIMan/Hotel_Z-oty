@@ -205,7 +205,8 @@ function InvoiceList({ entity }) {
     };
 
     const handleUnlinkClick = (invoice) => {
-        if (!invoice.matchedSettlementFile) {
+        // Allow unlink if matchedSettlementFile exists OR if status is 'paid' (to reset ghost payments)
+        if (!invoice.matchedSettlementFile && invoice.status !== 'paid') {
             setUnlinkingInvoice({
                 ...invoice,
                 isInfoOnly: true,
@@ -219,7 +220,9 @@ function InvoiceList({ entity }) {
             ...invoice,
             isInfoOnly: false,
             title: 'Potwierdzenie odłączenia',
-            message: `Czy na pewno chcesz odłączyć fakturę ${invoice.invoiceNumber} od rozliczenia?`
+            message: invoice.matchedSettlementFile
+                ? `Czy na pewno chcesz odłączyć fakturę ${invoice.invoiceNumber} od rozliczenia?`
+                : `Faktura ma status "Opłacona", ale brak powiązania z plikiem. Czy chcesz zmienić status na "Nieopłacona"?`
         });
     };
 
@@ -445,11 +448,11 @@ function InvoiceList({ entity }) {
                                             </button>
                                             <button
                                                 onClick={() => handleUnlinkClick(inv)}
-                                                className={`p-2 rounded-full transition-colors ${inv.matchedSettlementFile
-                                                    ? 'text-gray-400 hover:text-orange-500 hover:bg-orange-50'
+                                                className={`p-2 rounded-full transition-all shadow-sm ${(inv.matchedSettlementFile || inv.status === 'paid')
+                                                    ? 'text-orange-600 bg-orange-100 hover:bg-orange-200 hover:scale-105'
                                                     : 'text-gray-300 hover:text-gray-500 hover:bg-gray-50'
                                                     }`}
-                                                title={inv.matchedSettlementFile ? "Odłącz od rozliczenia" : "Brak powiązania"}
+                                                title={(inv.matchedSettlementFile || inv.status === 'paid') ? "Odłącz / Resetuj status" : "Brak powiązania"}
                                             >
                                                 <Unlink size={16} />
                                             </button>
@@ -536,9 +539,9 @@ function InvoiceList({ entity }) {
                                     </button>
                                     <button
                                         onClick={() => handleUnlinkClick(inv)}
-                                        className={`p-2 rounded-full ${inv.matchedSettlementFile
-                                            ? 'text-gray-400 hover:text-orange-500 bg-gray-50'
-                                            : 'text-gray-300 hover:text-gray-500 bg-gray-50'
+                                        className={`p-2 rounded-full border ${(inv.matchedSettlementFile || inv.status === 'paid')
+                                            ? 'text-orange-600 bg-orange-100 border-orange-200'
+                                            : 'text-gray-300 hover:text-gray-500 bg-gray-50 border-gray-100'
                                             }`}
                                     >
                                         <Unlink size={18} />

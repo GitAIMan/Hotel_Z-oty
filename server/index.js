@@ -706,36 +706,39 @@ app.post('/api/invoices/:id/unlink-transaction', async (req, res) => {
         const invoice = await Invoice.findByPk(id);
         if (!invoice) return res.status(404).json({ error: 'Invoice not found' });
 
-        // 2. Check if invoice is linked
-        if (!invoice.matchedSettlementFile) {
+        // 2. Check if invoice is linked OR paid
+        // Allow unlinking if it has a file OR if it's marked as paid (to reset status)
+        if (!invoice.matchedSettlementFile && invoice.status !== 'paid') {
             return res.status(400).json({ error: 'Invoice is not linked to any settlement' });
         }
 
         const linkedFileName = invoice.matchedSettlementFile;
 
-        // 3. Find Settlement
-        const settlement = await Settlement.findOne({
-            where: { fileName: linkedFileName }
-        });
+        // 3. Find Settlement (only if file exists)
+        if (linkedFileName) {
+            const settlement = await Settlement.findOne({
+                where: { fileName: linkedFileName }
+            });
 
-        if (settlement && settlement.paymentsData) {
-            // 4. Find and unmark the transaction
-            const payments = JSON.parse(JSON.stringify(settlement.paymentsData));
-            const payment = payments.find(p => p.matchedInvoiceId === invoice.id);
+            if (settlement && settlement.paymentsData) {
+                // 4. Find and unmark the transaction
+                const payments = JSON.parse(JSON.stringify(settlement.paymentsData));
+                const payment = payments.find(p => p.matchedInvoiceId === invoice.id);
 
-            if (payment) {
-                payment.matchStatus = 'unmatched';
-                payment.matchedInvoiceId = null;
-                payment.matchedInvoiceNumber = null;
+                if (payment) {
+                    payment.matchStatus = 'unmatched';
+                    payment.matchedInvoiceId = null;
+                    payment.matchedInvoiceNumber = null;
 
-                settlement.paymentsData = payments;
-                settlement.totalProcessed = payments.filter(p => p.matchStatus === 'matched').length;
-                settlement.changed('paymentsData', true);
-                await settlement.save();
+                    settlement.paymentsData = payments;
+                    settlement.totalProcessed = payments.filter(p => p.matchStatus === 'matched').length;
+                    settlement.changed('paymentsData', true);
+                    await settlement.save();
+                }
             }
         }
 
-        // 5. Unlink Invoice
+        // 5. Unlink Invoice (Reset Status)
         await invoice.update({
             status: 'unpaid',
             matchedSettlementFile: null
@@ -745,10 +748,10 @@ app.post('/api/invoices/:id/unlink-transaction', async (req, res) => {
         await History.create({
             entity: invoice.entity || 'zloty_gron',
             action: 'MANUAL_UNLINK',
-            description: `Manually unlinked invoice ${invoice.invoiceNumber} from settlement ${linkedFileName}`
+            description: `Manually unlinked invoice ${invoice.invoiceNumber}`
         });
 
-        console.log(`🔓 Manually unlinked Invoice ${invoice.id} from ${linkedFileName}`);
+        console.log(`🔓 Manually unlinked Invoice ${invoice.id}`);
 
         res.json({ success: true, invoice });
 
