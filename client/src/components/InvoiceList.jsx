@@ -328,8 +328,7 @@ function InvoiceList({ entity }) {
                                                         {inv.category}
                                                     </span>
                                                 )}
-                                                    </span>
-                                                )}
+
                                                 {inv.matchedSettlementFile && (
                                                     <p className="text-xs text-green-600 mt-1 flex items-center gap-1">
                                                         <CheckCircle size={10} />
@@ -397,107 +396,107 @@ function InvoiceList({ entity }) {
                                     </td>
                                 </tr>
                             ))}
-                        {invoices.length === 0 && (
-                            <tr>
-                                <td colSpan="6" className="py-24 text-center text-gray-400">
-                                    <div className="flex flex-col items-center gap-6">
-                                        <div className="w-24 h-24 bg-amber-50 rounded-full flex items-center justify-center">
-                                            <AlertCircle size={48} className="text-amber-200" />
+                            {invoices.length === 0 && (
+                                <tr>
+                                    <td colSpan="6" className="py-24 text-center text-gray-400">
+                                        <div className="flex flex-col items-center gap-6">
+                                            <div className="w-24 h-24 bg-amber-50 rounded-full flex items-center justify-center">
+                                                <AlertCircle size={48} className="text-amber-200" />
+                                            </div>
+                                            <p className="text-xl">Brak faktur dla {entity === 'zloty_gron' ? 'Złoty Groń' : 'Srebrny Bucznik'}.</p>
                                         </div>
-                                        <p className="text-xl">Brak faktur dla {entity === 'zloty_gron' ? 'Złoty Groń' : 'Srebrny Bucznik'}.</p>
+                                    </td>
+                                </tr>
+                            )}
+                        </tbody>
+                    </table>
+
+                </div>
+
+                {/* Mobile Card View */}
+                <div className="md:hidden divide-y divide-amber-100">
+                    {invoices.map((inv) => (
+                        <div key={inv.id} className="p-6 flex flex-col gap-4">
+                            <div className="flex justify-between items-start">
+                                <div className="flex items-center gap-3">
+                                    <div className="p-2 bg-white border border-amber-100 rounded-lg text-amber-500 shadow-sm">
+                                        <FileText size={20} />
                                     </div>
-                                </td>
-                            </tr>
-                        )}
-                    </tbody>
-                </table>
-
-            </div>
-
-            {/* Mobile Card View */}
-            <div className="md:hidden divide-y divide-amber-100">
-                {invoices.map((inv) => (
-                    <div key={inv.id} className="p-6 flex flex-col gap-4">
-                        <div className="flex justify-between items-start">
-                            <div className="flex items-center gap-3">
-                                <div className="p-2 bg-white border border-amber-100 rounded-lg text-amber-500 shadow-sm">
-                                    <FileText size={20} />
+                                    <div>
+                                        <p className="font-bold text-gray-900">{inv.invoiceNumber}</p>
+                                        <p className="text-xs text-gray-400">ID: {inv.id}</p>
+                                    </div>
                                 </div>
+                                <span className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wide ${inv.status === 'paid' ? 'bg-green-100 text-green-700 border border-green-200' :
+                                    inv.status === 'partial' ? 'bg-yellow-100 text-yellow-700 border border-yellow-200' :
+                                        'bg-red-50 text-red-600 border border-red-100'
+                                    }`}>
+                                    {inv.status === 'paid' && <CheckCircle size={12} />}
+                                    {inv.status === 'paid' ? 'Opłacona' : inv.status === 'partial' ? 'Częściowo' : 'Nieopłacona'}
+                                </span>
+                            </div>
+
+                            <div className="grid grid-cols-2 gap-4 text-sm">
                                 <div>
-                                    <p className="font-bold text-gray-900">{inv.invoiceNumber}</p>
-                                    <p className="text-xs text-gray-400">ID: {inv.id}</p>
+                                    <p className="text-gray-400 text-xs uppercase tracking-wider mb-1">Kontrahent</p>
+                                    <p className="font-medium text-gray-800">{inv.contractorName}</p>
+                                    {inv.contractorNIP && <p className="text-xs text-gray-400">{inv.contractorNIP}</p>}
+                                </div>
+                                <div className="text-right">
+                                    <p className="text-gray-400 text-xs uppercase tracking-wider mb-1">Kwota Brutto</p>
+                                    <p className="font-bold text-gray-900 text-xl">{inv.grossAmount} <span className="text-xs font-normal text-gray-400">PLN</span></p>
                                 </div>
                             </div>
-                            <span className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wide ${inv.status === 'paid' ? 'bg-green-100 text-green-700 border border-green-200' :
-                                inv.status === 'partial' ? 'bg-yellow-100 text-yellow-700 border border-yellow-200' :
-                                    'bg-red-50 text-red-600 border border-red-100'
-                                }`}>
-                                {inv.status === 'paid' && <CheckCircle size={12} />}
-                                {inv.status === 'paid' ? 'Opłacona' : inv.status === 'partial' ? 'Częściowo' : 'Nieopłacona'}
-                            </span>
-                        </div>
 
-                        <div className="grid grid-cols-2 gap-4 text-sm">
-                            <div>
-                                <p className="text-gray-400 text-xs uppercase tracking-wider mb-1">Kontrahent</p>
-                                <p className="font-medium text-gray-800">{inv.contractorName}</p>
-                                {inv.contractorNIP && <p className="text-xs text-gray-400">{inv.contractorNIP}</p>}
-                            </div>
-                            <div className="text-right">
-                                <p className="text-gray-400 text-xs uppercase tracking-wider mb-1">Kwota Brutto</p>
-                                <p className="font-bold text-gray-900 text-xl">{inv.grossAmount} <span className="text-xs font-normal text-gray-400">PLN</span></p>
-                            </div>
-                        </div>
-
-                        <div className="flex items-center justify-between pt-4 border-t border-amber-50/50">
-                            <div className="flex gap-4 text-xs text-gray-500">
-                                <div className="flex items-center gap-1">
-                                    <Calendar size={14} className="text-amber-300" />
-                                    <span>{inv.issueDate || '-'}</span>
+                            <div className="flex items-center justify-between pt-4 border-t border-amber-50/50">
+                                <div className="flex gap-4 text-xs text-gray-500">
+                                    <div className="flex items-center gap-1">
+                                        <Calendar size={14} className="text-amber-300" />
+                                        <span>{inv.issueDate || '-'}</span>
+                                    </div>
+                                    {inv.category && (
+                                        <span className="px-2 py-0.5 bg-amber-50 text-amber-600 border border-amber-100 rounded-md">
+                                            {inv.category}
+                                        </span>
+                                    )}
                                 </div>
-                                {inv.category && (
-                                    <span className="px-2 py-0.5 bg-amber-50 text-amber-600 border border-amber-100 rounded-md">
-                                        {inv.category}
-                                    </span>
-                                )}
-                            </div>
-                            <div className="flex items-center gap-2">
-                                <button
-                                    onClick={() => handleEdit(inv)}
-                                    className="p-2 text-gray-400 hover:text-blue-500 bg-gray-50 rounded-full"
-                                >
-                                    <Edit2 size={18} />
-                                </button>
-                                <button
-                                    onClick={() => handleDelete(inv.id)}
-                                    className="p-2 text-gray-400 hover:text-red-500 bg-gray-50 rounded-full"
-                                >
-                                    <Trash2 size={18} />
-                                </button>
-                                {inv.status !== 'paid' && (
+                                <div className="flex items-center gap-2">
                                     <button
-                                        onClick={() => handleLinkClick(inv)}
-                                        className="p-2 text-gray-400 hover:text-green-500 bg-gray-50 rounded-full"
+                                        onClick={() => handleEdit(inv)}
+                                        className="p-2 text-gray-400 hover:text-blue-500 bg-gray-50 rounded-full"
                                     >
-                                        <DollarSign size={18} />
+                                        <Edit2 size={18} />
                                     </button>
-                                )}
+                                    <button
+                                        onClick={() => handleDelete(inv.id)}
+                                        className="p-2 text-gray-400 hover:text-red-500 bg-gray-50 rounded-full"
+                                    >
+                                        <Trash2 size={18} />
+                                    </button>
+                                    {inv.status !== 'paid' && (
+                                        <button
+                                            onClick={() => handleLinkClick(inv)}
+                                            className="p-2 text-gray-400 hover:text-green-500 bg-gray-50 rounded-full"
+                                        >
+                                            <DollarSign size={18} />
+                                        </button>
+                                    )}
+                                </div>
                             </div>
                         </div>
-                    </div>
-                ))}
-                {invoices.length === 0 && (
-                    <div className="p-12 text-center text-gray-400">
-                        <div className="flex flex-col items-center gap-4">
-                            <AlertCircle size={32} className="text-amber-200" />
-                            <p>Brak faktur.</p>
+                    ))}
+                    {invoices.length === 0 && (
+                        <div className="p-12 text-center text-gray-400">
+                            <div className="flex flex-col items-center gap-4">
+                                <AlertCircle size={32} className="text-amber-200" />
+                                <p>Brak faktur.</p>
+                            </div>
                         </div>
-                    </div>
-                )}
-            </div>
+                    )}
+                </div>
 
-        </div>
-    );
+            </div>
+            );
 }
 
-export default InvoiceList;
+            export default InvoiceList;
