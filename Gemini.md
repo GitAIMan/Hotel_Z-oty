@@ -1,14 +1,14 @@
-# 💎 Złoty Groń - System Rozliczeń AI (v1.9.3)
+# 💎 Złoty Groń - System Rozliczeń AI (v1.9.5)
 
 **Status**: Produkcja (Railway) 🟢
 **Baza**: PostgreSQL (Managed) 🐘
 **AI**: Claude 4.5 Sonnet 🧠
 
-## 📅 Osiągnięcia Sesji (01.12.2024):
-1. **Advanced CSV Parsing**: Wdrożenie zaawansowanego parsera wyciągów bankowych (obsługa specyficznych formatów, regex).
-2. **Auto-Categorization**: Automatyczne przypisywanie kategorii kosztowych na podstawie słów kluczowych (np. Orlen -> Paliwo).
-3. **UI Cleanup**: Usunięcie zbędnej zakładki "Logi Systemu".
-4. **Encoding Fix**: Obsługa polskich znaków w plikach CSV (Windows-1250).
+## 📅 Osiągnięcia Sesji (02.12.2024):
+1. **Manual Linking**: Ręczne łączenie faktur z płatnościami przez modal wyboru transakcji.
+2. **Unlink Functionality**: Możliwość odłączenia/anulowania ręcznego połączenia.
+3. **UI Improvements**: Zmiana czcionki na Roboto, zmniejszenie rozmiaru elementów o 20%, poprawa kontrastu tabeli.
+4. **Smart Buttons**: Przycisk $ zawsze widoczny, przycisk Unlink tylko dla ręcznych połączeń.
 
 ---
 
@@ -78,6 +78,16 @@
     - 🧼 **Contractor Cleaning**: Agresywne czyszczenie nazw kontrahentów ("Glovoapp.com/pl Operacja:..." -> "Glovoapp.com/pl"). Usuwanie zbędnych sufiksów (Tytuł, Adres, Data).
     - 🗺️ **Expanded Categories**: Dodano dziesiątki nowych słów kluczowych (Stokrotka, Mol, Amic, Canva, Zoom, Slack, KFC, Starbucks, Media, Telekomy).
     - 🧠 **Matching Logic**: Wyjaśniono logikę parowania (Kwota +/- 0.20 PLN AND (Nr Faktury OR Nazwa Kontrahenta)).
+- **v1.9.5** (02.12.2024 - Manual Linking & UI Improvements):
+    - 🔗 **Manual Invoice-Settlement Linking**: Dodano możliwość ręcznego łączenia faktur z płatnościami przez modal wyboru transakcji (przycisk $). System wymaga unikatowych ID dla wszystkich transakcji (UUID).
+    - 🔓 **Unlink Functionality**: Przycisk odłączania (Unlink) - pozwala anulować ręczne połączenie faktury z rozliczeniem i przywrócić status "Nieopłacona".
+    - 🎨 **Font Update**: Zmiana globalnej czcionki na Roboto (profesjonalny wygląd).
+    - 📏 **UI Scaling**: Zmniejszenie wszystkich rozmiarów tekstu o 20% (Tailwind fontSize scale) dla lepszej kompaktowości.
+    - 📊 **Table Improvements**: Bardziej kompaktowa tabela faktur (mniejsze paddingi, lepszy kontrast ramek border-gray-300).
+    - 🎯 **Date Column Fix**: Naprawiono łamanie się dat w kolumnie przez dodanie `whitespace-nowrap`.
+    - 🛡️ **Smart Unlink Button**: Przycisk Unlink pokazuje się tylko dla faktur ręcznie połączonych (nie dla automatycznie dopasowanych przez AI).
+    - 🔧 **Backend Endpoints**: Nowe endpointy `POST /api/invoices/:id/link-transaction` i `POST /api/invoices/:id/unlink-transaction`.
+    - 📝 **Database Schema**: Dodano kolumnę `matchedSettlementFile` do modelu Invoice dla śledzenia ręcznych połączeń.
 
 ### Do Zrobienia (Zgodnie z Założenie.txt):
 1.  **Logika Biznesowa**:
