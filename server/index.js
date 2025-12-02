@@ -632,7 +632,6 @@ app.post('/api/invoices/confirm', async (req, res) => {
         console.error("Confirmation failed:", err);
         res.status(500).json({ error: err.message });
     }
-}
 });
 
 // 3b. Manual Link Transaction to Invoice
