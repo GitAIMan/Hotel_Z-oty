@@ -303,25 +303,25 @@ function InvoiceList({ entity }) {
                     <table className="w-full">
                         <thead>
                             <tr className="bg-amber-100/50 text-left border-b border-amber-100">
-                                <th className="py-6 px-8 font-bold text-amber-900/60 uppercase tracking-wider text-sm">Dokument</th>
-                                <th className="py-6 px-8 font-bold text-amber-900/60 uppercase tracking-wider text-sm">Kontrahent</th>
-                                <th className="py-6 px-8 font-bold text-amber-900/60 uppercase tracking-wider text-sm">Kwota Brutto</th>
-                                <th className="py-6 px-8 font-bold text-amber-900/60 uppercase tracking-wider text-sm">Daty</th>
-                                <th className="py-6 px-8 font-bold text-amber-900/60 uppercase tracking-wider text-sm">Status</th>
-                                <th className="py-6 px-8 font-bold text-amber-900/60 uppercase tracking-wider text-sm">Akcje</th>
+                                <th className="py-3 px-4 font-bold text-amber-900/60 uppercase tracking-wider text-xs">Dokument</th>
+                                <th className="py-3 px-4 font-bold text-amber-900/60 uppercase tracking-wider text-xs">Kontrahent</th>
+                                <th className="py-3 px-4 font-bold text-amber-900/60 uppercase tracking-wider text-xs">Kwota Brutto</th>
+                                <th className="py-3 px-4 font-bold text-amber-900/60 uppercase tracking-wider text-xs">Daty</th>
+                                <th className="py-3 px-4 font-bold text-amber-900/60 uppercase tracking-wider text-xs">Status</th>
+                                <th className="py-3 px-4 font-bold text-amber-900/60 uppercase tracking-wider text-xs">Akcje</th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-amber-50/50">
                             {invoices.map((inv) => (
-                                <tr key={inv.id} className="hover:bg-amber-50/50 transition-colors group border-b border-amber-50/30">
-                                    <td className="py-6 px-8">
-                                        <div className="flex items-center gap-4">
-                                            <div className="p-3 bg-white border border-amber-100 rounded-xl text-amber-500 shadow-sm group-hover:border-amber-300 transition-colors">
-                                                <FileText size={24} />
+                                <tr key={inv.id} className="hover:bg-amber-50/50 transition-colors group border-b border-gray-200">
+                                    <td className="py-4 px-4">
+                                        <div className="flex items-center gap-3">
+                                            <div className="p-2 bg-white border border-amber-100 rounded-lg text-amber-500 shadow-sm group-hover:border-amber-300 transition-colors">
+                                                <FileText size={18} />
                                             </div>
                                             <div>
-                                                <p className="font-bold text-gray-900 text-lg">{inv.invoiceNumber}</p>
-                                                <p className="text-sm text-gray-400">ID: {inv.id}</p>
+                                                <p className="font-bold text-gray-900 text-base">{inv.invoiceNumber}</p>
+                                                <p className="text-xs text-gray-400">ID: {inv.id}</p>
                                                 {inv.category && (
                                                     <span className="inline-block mt-1 px-2 py-0.5 bg-amber-50 text-amber-600 border border-amber-100 text-xs rounded-md">
                                                         {inv.category}
@@ -337,16 +337,16 @@ function InvoiceList({ entity }) {
                                             </div>
                                         </div>
                                     </td>
-                                    <td className="py-6 px-8">
-                                        <p className="text-gray-800 font-medium text-lg">{inv.contractorName}</p>
-                                        {inv.contractorNIP && <p className="text-sm text-gray-400">NIP: {inv.contractorNIP}</p>}
+                                    <td className="py-4 px-4">
+                                        <p className="text-gray-800 font-medium text-base">{inv.contractorName}</p>
+                                        {inv.contractorNIP && <p className="text-xs text-gray-400">NIP: {inv.contractorNIP}</p>}
                                     </td>
-                                    <td className="py-6 px-8">
-                                        <p className="font-bold text-gray-900 text-2xl">{inv.grossAmount} <span className="text-base text-gray-400 font-normal">PLN</span></p>
-                                        {inv.netAmount && <p className="text-sm text-gray-400">Netto: {inv.netAmount}</p>}
+                                    <td className="py-4 px-4">
+                                        <p className="font-bold text-gray-900 text-xl">{inv.grossAmount} <span className="text-sm text-gray-400 font-normal">PLN</span></p>
+                                        {inv.netAmount && <p className="text-xs text-gray-400">Netto: {inv.netAmount}</p>}
                                     </td>
                                     <td className="py-6 px-4">
-                                        <div className="flex flex-col gap-2 text-base text-gray-500 whitespace-nowrap">
+                                        <div className="flex flex-col gap-1 text-sm text-gray-500 whitespace-nowrap">
                                             <div className="flex items-center gap-2">
                                                 <Calendar size={16} className="text-amber-300" />
                                                 <span>Wyst: {inv.issueDate || '-'}</span>
@@ -357,7 +357,7 @@ function InvoiceList({ entity }) {
                                             </div>
                                         </div>
                                     </td>
-                                    <td className="py-6 px-8">
+                                    <td className="py-4 px-4">
                                         <span className={`inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-bold uppercase tracking-wide ${inv.status === 'paid' ? 'bg-green-100 text-green-700 border border-green-200' :
                                             inv.status === 'partial' ? 'bg-yellow-100 text-yellow-700 border border-yellow-200' :
                                                 'bg-red-50 text-red-600 border border-red-100'
@@ -373,24 +373,22 @@ function InvoiceList({ entity }) {
                                                 className="p-2 text-gray-400 hover:text-blue-500 hover:bg-blue-50 rounded-full transition-colors"
                                                 title="Edytuj fakturę"
                                             >
-                                                <Edit2 size={20} />
+                                                <Edit2 size={16} />
                                             </button>
                                             <button
                                                 onClick={() => handleDelete(inv.id)}
                                                 className="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-full transition-colors"
                                                 title="Usuń fakturę"
                                             >
-                                                <Trash2 size={20} />
+                                                <Trash2 size={16} />
                                             </button>
-                                            {inv.status !== 'paid' && (
-                                                <button
-                                                    onClick={() => handleLinkClick(inv)}
-                                                    className="p-2 text-gray-400 hover:text-green-500 hover:bg-green-50 rounded-full transition-colors"
-                                                    title="Połącz z płatnością"
-                                                >
-                                                    <DollarSign size={20} />
-                                                </button>
-                                            )}
+                                            <button
+                                                onClick={() => handleLinkClick(inv)}
+                                                className="p-2 text-gray-400 hover:text-green-500 hover:bg-green-50 rounded-full transition-colors"
+                                                title="Połącz z płatnością"
+                                            >
+                                                <DollarSign size={16} />
+                                            </button>
                                         </div>
                                     </td>
                                 </tr>
