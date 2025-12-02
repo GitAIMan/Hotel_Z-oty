@@ -758,7 +758,7 @@ app.post('/api/invoices/:id/unlink-transaction', async (req, res) => {
     }
 });
 
-});
+
 
 // 3d. Unlink All Transactions from Settlement
 app.post('/api/settlements/:id/unlink-all', async (req, res) => {
