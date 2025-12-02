@@ -496,7 +496,8 @@ function InvoiceList({ entity }) {
                 </div>
 
             </div>
-            );
+        </div>
+    );
 }
 
-            export default InvoiceList;
+export default InvoiceList;
