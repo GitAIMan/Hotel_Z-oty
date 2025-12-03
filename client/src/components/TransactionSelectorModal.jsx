@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { X, Search, Check, DollarSign, Calendar, ArrowRight } from 'lucide-react';
 import { getSettlements } from '../api';
 
-const TransactionSelectorModal = ({ isOpen, onClose, onSelect, entity }) => {
+const TransactionSelectorModal = ({ isOpen, onClose, onSelect, entity, initialSearch = '' }) => {
     const [settlements, setSettlements] = useState([]);
     const [loading, setLoading] = useState(false);
     const [searchTerm, setSearchTerm] = useState('');
@@ -10,9 +10,10 @@ const TransactionSelectorModal = ({ isOpen, onClose, onSelect, entity }) => {
 
     useEffect(() => {
         if (isOpen) {
+            setSearchTerm(initialSearch);
             fetchSettlements();
         }
-    }, [isOpen, entity]);
+    }, [isOpen, entity, initialSearch]);
 
     const fetchSettlements = async () => {
         setLoading(true);

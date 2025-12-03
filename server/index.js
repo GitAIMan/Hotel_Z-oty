@@ -738,22 +738,34 @@ app.post('/api/invoices/:id/unlink-transaction', async (req, res) => {
 
             if (settlement && settlement.paymentsData) {
                 // 4. Find and unmark the transaction
-                const payments = JSON.parse(JSON.stringify(settlement.paymentsData));
+                // Deep copy to ensure Sequelize detects change
+                let payments = JSON.parse(JSON.stringify(settlement.paymentsData));
+
                 // Try finding by ID first (loose equality), then by Invoice Number
-                let payment = payments.find(p => p.matchedInvoiceId == invoice.id);
-                if (!payment) {
-                    payment = payments.find(p => p.matchedInvoiceNumber === invoice.invoiceNumber);
+                let paymentIndex = payments.findIndex(p => p.matchedInvoiceId == invoice.id);
+                if (paymentIndex === -1) {
+                    paymentIndex = payments.findIndex(p => p.matchedInvoiceNumber === invoice.invoiceNumber);
                 }
 
-                if (payment) {
-                    payment.matchStatus = 'unmatched';
-                    payment.matchedInvoiceId = null;
-                    payment.matchedInvoiceNumber = null;
+                if (paymentIndex !== -1) {
+                    console.log(`   Found matched payment at index ${paymentIndex}. Previous status: ${payments[paymentIndex].matchStatus}`);
 
+                    // Update the payment object in the array
+                    payments[paymentIndex].matchStatus = 'unmatched';
+                    payments[paymentIndex].matchedInvoiceId = null;
+                    payments[paymentIndex].matchedInvoiceNumber = null;
+
+                    // Explicitly reassign the array to the model
                     settlement.paymentsData = payments;
                     settlement.totalProcessed = payments.filter(p => p.matchStatus === 'matched').length;
+
+                    // Force Sequelize to recognize the change
                     settlement.changed('paymentsData', true);
+
                     await settlement.save();
+                    console.log(`   ✅ Settlement saved. Payment status reset to 'unmatched'.`);
+                } else {
+                    console.warn(`   ⚠️ Payment not found in settlement for invoice ${invoice.id} / ${invoice.invoiceNumber}`);
                 }
             }
         }
