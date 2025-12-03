@@ -3,13 +3,53 @@ import { X, Search, Check, DollarSign, Calendar, ArrowRight } from 'lucide-react
 import { getSettlements } from '../api';
 
 const TransactionSelectorModal = ({ isOpen, onClose, onSelect, entity, initialSearch = '', viewMode = false }) => {
-    // ... (state)
+    const [settlements, setSettlements] = useState([]);
+    const [loading, setLoading] = useState(false);
+    const [searchTerm, setSearchTerm] = useState(initialSearch);
+    const [expandedSettlement, setExpandedSettlement] = useState(null);
 
-    // ... (useEffect)
+    useEffect(() => {
+        if (isOpen) {
+            fetchSettlements();
+            setSearchTerm(initialSearch);
+        }
+    }, [isOpen, entity, initialSearch]);
 
-    // ... (fetchSettlements)
+    const fetchSettlements = async () => {
+        setLoading(true);
+        try {
+            const response = await getSettlements(entity);
+            // Handle both array and object response formats just in case
+            const data = Array.isArray(response) ? response : (response.data || []);
+            setSettlements(data);
+        } catch (error) {
+            console.error('Error fetching settlements:', error);
+            setSettlements([]);
+        } finally {
+            setLoading(false);
+        }
+    };
 
-    // ... (filteredSettlements)
+    const filteredSettlements = settlements.map(settlement => {
+        // Ensure paymentsData exists
+        const payments = settlement.paymentsData || [];
+
+        const filteredPayments = payments.filter(payment => {
+            if (!searchTerm) return true;
+            const searchLower = searchTerm.toLowerCase();
+            return (
+                (payment.contractor && payment.contractor.toLowerCase().includes(searchLower)) ||
+                (payment.description && payment.description.toLowerCase().includes(searchLower)) ||
+                (payment.amount && payment.amount.toString().includes(searchLower)) ||
+                (settlement.fileName && settlement.fileName.toLowerCase().includes(searchLower))
+            );
+        });
+
+        return {
+            ...settlement,
+            filteredPayments
+        };
+    }).filter(s => s.filteredPayments.length > 0);
 
     if (!isOpen) return null;
 
