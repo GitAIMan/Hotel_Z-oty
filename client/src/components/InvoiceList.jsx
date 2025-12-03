@@ -445,6 +445,36 @@ function InvoiceList({ entity }) {
                                             </button>
                                             <button
                                                 onClick={() => handleLinkClick(inv)}
+                                                className="p-2 text-gray-400 hover:text-green-500 hover:bg-green-50 rounded-full transition-colors"
+                                                title="Połącz z płatnością"
+                                            >
+                                                <DollarSign size={16} />
+                                            </button>
+
+                                            {(inv.matchedSettlementFile || inv.status === 'paid') && (
+                                                <button
+                                                    onClick={() => {
+                                                        setLinkInvoiceId(inv.id);
+                                                        setShowLinkModal(true);
+                                                    }}
+                                                    className="p-2 text-blue-400 hover:text-blue-600 hover:bg-blue-50 rounded-full transition-colors"
+                                                    title="Zobacz powiązanie"
+                                                >
+                                                    <Eye size={16} />
+                                                </button>
+                                            )}
+
+                                            <button
+                                                onClick={() => handleUnlinkClick(inv)}
+                                                className={`p-2 rounded-full transition-all shadow-sm ${(inv.matchedSettlementFile || inv.status === 'paid')
+                                                        ? 'text-orange-600 bg-orange-100 hover:bg-orange-200 hover:scale-105'
+                                                        : 'text-gray-300 hover:text-gray-500 hover:bg-gray-50'
+                                                    }`}
+                                                title={(inv.matchedSettlementFile || inv.status === 'paid') ? "Odłącz / Resetuj status" : "Brak powiązania"}
+                                            >
+                                                <Unlink size={16} />
+                                            </button>
+                                        </div>
                                     </td>
                                 </tr>
                             ))}
