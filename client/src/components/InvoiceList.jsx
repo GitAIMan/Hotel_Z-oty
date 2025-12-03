@@ -47,17 +47,6 @@ function InvoiceList({ entity }) {
         fetchInvoices();
     }, [entity]);
 
-    // ... (rest of the file)
-
-    const handleLinkClick = (invoice) => {
-        setLinkInvoiceId(invoice.id);
-        setViewMode(false); // Link mode - show all, allow selection
-        setShowLinkModal(true);
-    };
-
-    // ...
-
-
 
     const fetchInvoices = async () => {
         try {
@@ -197,6 +186,7 @@ function InvoiceList({ entity }) {
 
     const handleLinkClick = (invoice) => {
         setLinkInvoiceId(invoice.id);
+        setViewMode(false); // Link mode - show all, allow selection
         setShowLinkModal(true);
     };
 
