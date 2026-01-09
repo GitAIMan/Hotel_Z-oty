@@ -104,7 +104,7 @@ async function authenticate() {
         const authRes = await axios.post(`${KSEF_HOST}${KSEF_BASE}/auth/ksef-token`, {
             challenge: challenge,
             contextIdentifier: {
-                type: 'Nip', // Defined in v2 Enum
+                type: 'onip', // Using 'onip' (Organization NIP) as per common KSeF practice
                 value: NIP
             },
             encryptedToken: encryptedToken
@@ -124,7 +124,8 @@ async function authenticate() {
             });
             // statusRes.data.status // { code: 200, description: "..." }
             const statusCode = statusRes.data.status?.code;
-            console.log('  - Status:', statusCode, statusRes.data.status?.description);
+            const statusDesc = statusRes.data.status?.description;
+            console.log(`  - Status: ${statusCode} (${statusDesc})`);
 
             if (statusCode === 200) {
                 status = '200';
@@ -157,7 +158,8 @@ async function authenticate() {
 
     } catch (error) {
         console.error('❌ KSeF Auth Failed:', error.response?.data || error.message);
-        throw error;
+        const details = error.response?.data ? JSON.stringify(error.response.data) : error.message;
+        throw new Error(`Auth Failed: ${details}`);
     }
 }
 
@@ -203,7 +205,8 @@ router.post('/refresh', async (req, res) => {
         await authenticate(); // Force new auth
         res.json({ success: true, message: 'Token odświeżony pomyślnie' });
     } catch (error) {
-        res.status(500).json({ success: false, message: 'Błąd odświeżania: ' + error.message });
+        console.error("Refresh Error:", error);
+        res.status(500).json({ success: false, message: 'Błąd: ' + error.message, details: error.message });
     }
 });
 
