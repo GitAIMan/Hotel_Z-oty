@@ -91,13 +91,17 @@ async function authenticate() {
         // Response structure: { keys: [ { publicKey: "PEM...", ... } ] } ?
         // I need to parse the response. Assuming first key is valid for now.
         // If getting raw PEM is tricky, I hope the response is standard JSON.
-        const publicKey = keysRes.data.pem || keysRes.data.keys?.[0]?.publicKey || keysRes.data.publicKey;
-        // This is a guess on structure. I should have read the schema. 
-        // But invalid key will fail encryption.
+        // Correct path for KSeF 2.0: keysRes.data.ksefKeyList[0].publicKey
+        if (!keysRes.data.ksefKeyList || keysRes.data.ksefKeyList.length === 0) {
+            throw new Error('No public keys returned from KSeF.');
+        }
+        const publicKey = keysRes.data.ksefKeyList[0].publicKey;
 
         // 3. Encrypt Token
-        console.log('🔐 3. Encrypting Token...');
-        const encryptedToken = encryptToken(API_TOKEN, timestamp, publicKey);
+        // KSeF requires timestamp in milliseconds
+        const timestampMs = new Date(timestamp).getTime();
+        console.log('🔐 3. Encrypting Token... (TimeMs:', timestampMs, ')');
+        const encryptedToken = encryptToken(API_TOKEN, timestampMs, publicKey);
 
         // 4. Send Auth Request
         console.log('📡 4. Sending Auth Request...');
