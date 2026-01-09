@@ -10,6 +10,7 @@ import DuplicateInvoiceModal from './DuplicateInvoiceModal';
 import MobilePhotoUploader from './MobilePhotoUploader';
 import TransactionSelectorModal from './TransactionSelectorModal';
 import ConfirmUnlinkModal from './ConfirmUnlinkModal';
+import KsefPanel from './KsefPanel';
 import { linkInvoiceToTransaction, unlinkInvoiceFromTransaction } from '../api';
 
 // Configure PDF.js worker
@@ -40,6 +41,9 @@ function InvoiceList({ entity }) {
 
     // Unlink State
     const [unlinkingInvoice, setUnlinkingInvoice] = useState(null);
+
+    // KSeF State
+    const [showKsefPanel, setShowKsefPanel] = useState(false);
 
     const fileInputRef = useRef(null);
 
@@ -353,12 +357,29 @@ function InvoiceList({ entity }) {
             </div>
 
             {/* Invoices List */}
+            {/* KSeF Panel Modal */}
+            <KsefPanel
+                isOpen={showKsefPanel}
+                onClose={() => setShowKsefPanel(false)}
+                entity={entity}
+                onImportSuccess={fetchInvoices}
+            />
+
             <div className="glass-card rounded-3xl overflow-hidden shadow-xl border border-amber-200/50 bg-gradient-to-b from-white to-amber-50/30">
-                <div className="p-8 border-b border-amber-100 flex justify-between items-center bg-amber-50/50">
+                <div className="p-8 border-b border-amber-100 flex flex-wrap justify-between items-center gap-4 bg-amber-50/50">
                     <h2 className="text-2xl font-bold text-gray-800 font-serif">Ostatnie Faktury</h2>
-                    <span className="bg-amber-100 text-amber-800 px-6 py-2 rounded-full text-sm font-bold tracking-wide uppercase border border-amber-200">
-                        {entity === 'zloty_gron' ? 'Złoty Groń' : 'Srebrny Bucznik'}
-                    </span>
+                    <div className="flex items-center gap-3">
+                        <button
+                            onClick={() => setShowKsefPanel(true)}
+                            className="flex items-center gap-2 px-4 py-2 bg-blue-500 text-white font-medium rounded-lg hover:bg-blue-600 transition-colors shadow-md"
+                        >
+                            <FileText size={18} />
+                            <span>Pobierz z KSeF</span>
+                        </button>
+                        <span className="bg-amber-100 text-amber-800 px-6 py-2 rounded-full text-sm font-bold tracking-wide uppercase border border-amber-200">
+                            {entity === 'zloty_gron' ? 'Złoty Groń' : 'Srebrny Bucznik'}
+                        </span>
+                    </div>
                 </div>
 
                 <div className="overflow-x-auto hidden md:block border border-gray-300 rounded-lg shadow-sm">

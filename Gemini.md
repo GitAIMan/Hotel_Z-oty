@@ -5,10 +5,10 @@
 **AI**: Claude 4.5 Sonnet 🧠
 
 ## 📅 Osiągnięcia Sesji (02.12.2024):
-1. **Manual Linking**: Ręczne łączenie faktur z płatnościami przez modal wyboru transakcji.
-2. **Unlink Functionality**: Możliwość odłączenia/anulowania ręcznego połączenia.
-3. **UI Improvements**: Zmiana czcionki na Roboto, zmniejszenie rozmiaru elementów o 20%, poprawa kontrastu tabeli.
-4. **Smart Buttons**: Przycisk $ zawsze widoczny, przycisk Unlink tylko dla ręcznych połączeń.
+1. **Link vs View Modes**: Rozdzielenie logiki przycisków - `$` (Link) pozwala łączyć ze wszystkimi transakcjami, `Oko` (View) pokazuje tylko podgląd powiązanej transakcji (read-only).
+2. **Critical Fixes**: Naprawa błędów budowania ("Unexpected try", "Duplicate declaration") oraz błędu runtime "searchTerm is not defined".
+3. **Modal Logic**: Poprawa logiki `TransactionSelectorModal` - przywrócenie brakującego stanu i obsługi wyszukiwania.
+4. **Code Cleanup**: Usunięcie zduplikowanego kodu i śmieciowych komentarzy w `InvoiceList.jsx`.
 
 ---
 
@@ -88,6 +88,11 @@
     - 🛡️ **Smart Unlink Button**: Przycisk Unlink pokazuje się tylko dla faktur ręcznie połączonych (nie dla automatycznie dopasowanych przez AI).
     - 🔧 **Backend Endpoints**: Nowe endpointy `POST /api/invoices/:id/link-transaction` i `POST /api/invoices/:id/unlink-transaction`.
     - 📝 **Database Schema**: Dodano kolumnę `matchedSettlementFile` do modelu Invoice dla śledzenia ręcznych połączeń.
+- **v1.9.6** (03.12.2024 - Stability & UX Refinement):
+    - 👁️ **Link vs View Separation**: Jasne rozdzielenie akcji. Przycisk `$` otwiera modal w trybie edycji (wszystkie transakcje), przycisk `Oko` w trybie podglądu (tylko powiązana, brak przycisku "Wybierz").
+    - 🐛 **Build Fixes**: Naprawiono krytyczne błędy uniemożliwiające deploy na Railway (błędy składni JSX, zduplikowane deklaracje funkcji).
+    - 🔧 **Runtime Fixes**: Naprawiono błąd `ReferenceError: searchTerm is not defined` w modalu wyboru transakcji poprzez przywrócenie brakującej logiki stanu.
+    - 🧹 **Code Hygiene**: Oczyszczenie `InvoiceList.jsx` ze zduplikowanego kodu i pozostałości po debugowaniu.
 
 ### Do Zrobienia (Zgodnie z Założenie.txt):
 1.  **Logika Biznesowa**:

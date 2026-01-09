@@ -9,6 +9,7 @@ const iconv = require('iconv-lite');
 const { initDb, Invoice, Settlement, History, sequelize } = require('./db');
 const { Op } = require('sequelize');
 const crypto = require('crypto');
+const ksefRoutes = require('./ksefRoutes');
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -21,6 +22,9 @@ const anthropic = new Anthropic({
 // Middleware
 app.use(cors());
 app.use(express.json());
+
+// KSeF Routes
+app.use('/api/ksef', ksefRoutes);
 
 // Ensure uploads directory exists
 const uploadDir = path.join(__dirname, 'uploads');

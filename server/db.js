@@ -119,6 +119,17 @@ const Invoice = sequelize.define('Invoice', {
   raw_ai_data: {
     type: DataTypes.JSON,
     allowNull: true
+  },
+
+  // Źródło faktury (v3 - KSeF)
+  source: {
+    type: DataTypes.STRING, // 'manual', 'csv', 'ksef'
+    allowNull: true,
+    defaultValue: 'manual'
+  },
+  ksefReferenceNumber: {
+    type: DataTypes.STRING, // Numer referencyjny KSeF
+    allowNull: true
   }
 });
 
