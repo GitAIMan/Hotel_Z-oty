@@ -17,8 +17,8 @@ const { Invoice, History } = require('./db');
 const router = express.Router();
 
 // KSeF Test Environment
-const KSEF_HOST = 'ksef-test.mf.gov.pl';
-const KSEF_BASE = '/api';
+const KSEF_HOST = 'ksef-test.mf.gov.pl'; // Standard Test Environment (KSeF 2.0)
+const KSEF_BASE = '/api/v2'; // Changed from /api to /api/v2 for KSeF 2.0
 
 // Token storage (in memory - Railway doesn't persist files)
 let tokenStorage = {
